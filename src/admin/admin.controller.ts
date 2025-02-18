@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Request, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/requests/create-admin.dto';
 import { UpdateAdminDto } from './dto/requests/update-admin.dto';
@@ -11,10 +11,24 @@ import { Serialize } from 'src/common/interceptors/serialize.interceptor';
 import { AdminDto } from './dto/responses/admin.dto';
 import { AuthAdminDto } from './dto/responses/auth-admin.dto';
 import { LoginAdminDto } from './dto/requests/login-admin.dto';
+import { AdminGuard } from 'src/common/guards/admin.guard';
 
 @Controller('admins')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  @Get('/profile')
+  @Serialize(AdminDto)
+  @UseGuards(AdminGuard)
+  getProfile(@Request() req) {
+    return req.user;
+  }
+
+  @Post('/login')
+  @Serialize(AuthAdminDto, 'Successfully login.')
+  login(@Body() body: LoginAdminDto) {
+    return this.adminService.login(body);
+  }
 
   @Post()
   @UseInterceptors(
@@ -32,18 +46,21 @@ export class AdminController {
     }),
   )
   @Serialize(AdminDto, 'Admin created successfully.')
+  @UseGuards(AdminGuard)
   create(@Body() createAdminDto: CreateAdminDto, @UploadedFile() file: Express.Multer.File) {
     return this.adminService.create(createAdminDto, file);
   }
 
   @Get()
   @Serialize(AdminDto)
+  @UseGuards(AdminGuard)
   findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Admin>> {
     return this.adminService.findAll(query);
   }
 
   @Get(':id')
   @Serialize(AdminDto)
+  @UseGuards(AdminGuard)
   findOne(@Param('id') id: string) {
     return this.adminService.findOne(+id);
   }
@@ -64,19 +81,15 @@ export class AdminController {
     }),
   )
   @Serialize(AdminDto, 'Admin updated successfully.')
+  @UseGuards(AdminGuard)
   update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto, @UploadedFile() file: Express.Multer.File) {
     return this.adminService.update(+id, updateAdminDto, file);
   }
 
   @Delete(':id')
   @Serialize(AdminDto, 'Admin deleted successfully.')
+  @UseGuards(AdminGuard)
   remove(@Param('id') id: string) {
     return this.adminService.remove(+id);
-  }
-
-  @Post('/login')
-  @Serialize(AuthAdminDto, 'Successfully login.')
-  login(@Body() body: LoginAdminDto) {
-    return this.adminService.login(body);
   }
 }
