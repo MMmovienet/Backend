@@ -6,9 +6,12 @@ export class Admin extends BaseEntity<Admin> {
     @Column()
     name: string;
 
-    @Column()
+    @Column({unique: true})
     email: string;
 
+    @Column({nullable: true, type: 'varchar', default: null})
+    image: string | null;
+
     @Column()
-    image: string;
+    password: string;
 }

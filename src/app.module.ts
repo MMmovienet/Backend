@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { AdminModule } from './admin/admin.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './common/database/database.module';
+import { IsUniqueConstraint } from './common/validators/is-unique.constraint ';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { DatabaseModule } from './common/database/database.module';
     AdminModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, IsUniqueConstraint],
 })
 export class AppModule {}
