@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from './dto/requests/create-admin.dto';
 import { UpdateAdminDto } from './dto/requests/update-admin.dto';
-import { generatePassword, throwValidationError, unlinkImage } from 'src/common/helper';
+import { generatePassword, throwCustomError, unlinkImage } from 'src/common/helper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Admin } from './entities/admin.entity';
@@ -50,7 +50,7 @@ export class AdminService {
   async findOne(id: number) {
     const admin = await this.adminRepository.findOne({where: {id}}); 
     if(!admin) {
-        throwValidationError('Admin not found.');
+        throwCustomError('Admin not found.');
     }
     return admin;
   }
@@ -60,7 +60,7 @@ export class AdminService {
     if(updateAdminDto.email) {
         const existedAdmin = await this.adminRepository.findOne({where: {email: updateAdminDto.email, id: Not(id)}});
         if(existedAdmin) {
-            throwValidationError('Email has already exist.');
+            throwCustomError('Email has already exist.');
         }
     }
     if(updateAdminDto.password) {
@@ -90,12 +90,12 @@ export class AdminService {
   async login(loginAdminDto: LoginAdminDto) {
     const [user] = await this.adminRepository.find({ where: { email: loginAdminDto.email } });
     if(!user) {
-      throwValidationError('Your credentials is incorrect.', HttpStatus.UNAUTHORIZED);
+      throwCustomError('Your credentials is incorrect.', HttpStatus.UNAUTHORIZED);
     }   
     const [salt, storedHash] = user.password.split('.');
     const hash = (await scrypt(loginAdminDto.password, salt, 32)) as Buffer;
     if(storedHash !== hash.toString('hex')) {
-      throwValidationError('Your password is incorrect!', HttpStatus.UNAUTHORIZED);
+      throwCustomError('Your password is incorrect!', HttpStatus.UNAUTHORIZED);
     }
     const token = await this.generateToken({ id: user.id, email: user.email });
     return {...user, access_token: token};

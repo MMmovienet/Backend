@@ -6,7 +6,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 const scrypt = promisify(_scrypt);
 
-export const throwValidationError = (message: string, httpStatus: HttpStatus = HttpStatus.UNPROCESSABLE_ENTITY) => {
+export const throwCustomError = (message: string, httpStatus: HttpStatus = HttpStatus.UNPROCESSABLE_ENTITY) => {
     throw new HttpException(
         { message: [message], error: 'Validation Error' },
         httpStatus,
