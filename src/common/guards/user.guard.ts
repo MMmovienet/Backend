@@ -1,29 +1,28 @@
 import { CanActivate, ExecutionContext, HttpStatus, Injectable } from "@nestjs/common";
-import { Request } from 'express';
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { AdminService } from "src/admin/admin.service";
+import { Request } from "express";
 import { throwCustomError } from "../helper";
+import { UsersAdminService } from "src/users/admin/users-admin.service";
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class UserGuard implements CanActivate {
     constructor(
         private jwtService: JwtService,
-        private adminService: AdminService,
+        private userService: UsersAdminService,
         private configService: ConfigService,
-    ) {}
+    ){}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
-
-        if (!token) {
+        if(!token) {
             throwCustomError('Unauthenticated', HttpStatus.UNAUTHORIZED);
         }
-
+        
         try {
-            const payload = await this.jwtService.verifyAsync(token!, {secret: this.configService.get('JWT_SECRET')});
-            const user = await this.adminService.findOne(payload.id);
+            const payload = await this.jwtService.verifyAsync(token!, {secret: this.configService.get('JWT_SECRET')});// error occur
+            const user = await this.userService.findOne(+payload.id);
             if (!user) {
                 throwCustomError('Unauthenticated', HttpStatus.UNAUTHORIZED);
             }
