@@ -6,7 +6,7 @@ export class CreateAdminDto {
     name: string;
 
     @IsString()
-    @IsUnique({tableName: 'admin', column: 'email'})
+    @IsUnique({tableName: 'admins', column: 'email'})
     @IsEmail({}, {message: "Email must be a valid email."})
     email: string;
 

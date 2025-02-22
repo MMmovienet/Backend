@@ -8,6 +8,7 @@ import { IsUniqueConstraint } from './common/validators/is-unique.constraint ';
 import { UsersModule } from './users/users.module';
 import { GenresModule } from './genres/genres.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MoviesModule } from './movies/movies.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
         AdminModule,
         UsersModule,
         GenresModule,
+        MoviesModule,
   ],
   controllers: [AppController],
   providers: [AppService, IsUniqueConstraint],

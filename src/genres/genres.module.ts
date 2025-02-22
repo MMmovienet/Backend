@@ -14,5 +14,6 @@ import { AdminModule } from 'src/admin/admin.module';
   ],
   controllers: [GenresController, GenresAdminController],
   providers: [GenresService, GenresAdminService],
+  exports: [GenresAdminService]
 })
 export class GenresModule {}

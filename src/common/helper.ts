@@ -20,6 +20,13 @@ export const generatePassword = async (plainPassword: string) => {
     return hashPassword;
 }
 
-export const unlinkImage = async (path: string, imageName: string) => {
-    await fs.unlink(join(__dirname, '..', '..', '..', 'uploads', path, imageName))
+export const unlinkImage = async (path: string, mediaName: string) => {
+    const filePath = join(__dirname, '..', '..', '..', 'uploads', path, mediaName);
+    console.log('Deleting file:', filePath);
+    try {
+        await fs.unlink(filePath);
+        console.log('File deleted successfully:', filePath);
+    } catch (error) {
+        console.error('Error deleting file:', error);
+    }
 }
