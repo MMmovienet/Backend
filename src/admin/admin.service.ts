@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from './dto/requests/create-admin.dto';
 import { UpdateAdminDto } from './dto/requests/update-admin.dto';
-import { generatePassword, throwCustomError, unlinkImage } from 'src/common/helper';
+import { generatePassword, throwCustomError, unlinkFile } from 'src/common/helper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Admin } from './entities/admin.entity';
@@ -69,7 +69,7 @@ export class AdminService {
         updateAdminDto.password = admin!.password
     }
     if(file && admin!.image) {
-        await unlinkImage('admins', admin!.image);
+        await unlinkFile('admins', admin!.image);
     }
     Object.assign(admin!, updateAdminDto);
     if(file) {
@@ -81,7 +81,7 @@ export class AdminService {
   async remove(id: number) {
       const admin = await this.findOne(id);
       if(admin!.image) {
-          await unlinkImage('admins', admin!.image);
+          await unlinkFile('admins', admin!.image);
       }
       await this.adminRepository.remove(admin!);
       return admin;

@@ -4,7 +4,7 @@ import { Movie } from "../entities/movie.entity";
 import { Repository } from "typeorm";
 import { CreateMovieDto } from "../dto/requests/create-movie.dto";
 import { UpdateMovieDto } from "../dto/requests/update-movie.dto";
-import { throwCustomError, unlinkImage } from "src/common/helper";
+import { throwCustomError, unlinkFile } from "src/common/helper";
 import { paginate, PaginateConfig, Paginated, PaginateQuery } from "nestjs-paginate";
 import { GenresAdminService } from "src/genres/admin/genres-admin.service";
 
@@ -41,7 +41,7 @@ export class MoviesAdminService {
         );
 
         if(file) {
-            await unlinkImage('movies', movie.src);
+            await unlinkFile('movies', movie.src);
         }
 
         Object.assign(movie, {
@@ -75,7 +75,7 @@ export class MoviesAdminService {
     
     async remove(id: number) {
         const movie = await this.findOne(id);
-        await unlinkImage('movies', movie.src);
+        await unlinkFile('movies', movie.src);
         await this.movieRepository.remove(movie);
         return movie;
     }

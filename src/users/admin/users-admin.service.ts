@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../entities/user.entity";
 import { Not, Repository } from "typeorm";
 import { CreateUserDto } from "../dto/requests/create-user.dto";
-import { generatePassword, throwCustomError, unlinkImage } from "src/common/helper";
+import { generatePassword, throwCustomError, unlinkFile } from "src/common/helper";
 import { UpdateUserDto } from "../dto/requests/update-user.dto";
 import { paginate, PaginateConfig, Paginated, PaginateQuery } from "nestjs-paginate";
 
@@ -47,7 +47,7 @@ export class UsersAdminService {
         }
     
         if(file) {
-            if(user.image) await unlinkImage('users', user.image);
+            if(user.image) await unlinkFile('users', user.image);
             user.image = file.filename;
         }
         
@@ -76,7 +76,7 @@ export class UsersAdminService {
     async remove(id: number): Promise<User> {
         const user = await this.findOne(id);
         if(user!.image) {
-            await unlinkImage('admins', user!.image);
+            await unlinkFile('admins', user!.image);
         }
         await this.userRepository.remove(user!);
         return user;

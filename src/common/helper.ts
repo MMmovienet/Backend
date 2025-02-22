@@ -20,8 +20,8 @@ export const generatePassword = async (plainPassword: string) => {
     return hashPassword;
 }
 
-export const unlinkImage = async (path: string, mediaName: string) => {
-    const filePath = join(__dirname, '..', '..', '..', 'uploads', path, mediaName);
+export const unlinkFile = async (path: string, mediaName: string) => {
+    const filePath = join(process.cwd(), 'uploads', path, mediaName);
     console.log('Deleting file:', filePath);
     try {
         await fs.unlink(filePath);

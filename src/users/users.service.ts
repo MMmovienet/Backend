@@ -8,7 +8,7 @@ import { CreateUserDto } from './dto/requests/create-user.dto';
 import { UpdateUserDto } from './dto/requests/update-user.dto';
 import { LoginUserDto } from './dto/requests/login-user.dto';
 import { User } from './entities/user.entity';
-import { generatePassword, throwCustomError, unlinkImage } from 'src/common/helper';
+import { generatePassword, throwCustomError, unlinkFile } from 'src/common/helper';
 
 const scrypt = promisify(_scrypt);
 
@@ -62,7 +62,7 @@ export class UsersService {
     }
 
     if(file) {
-        await unlinkImage('users', user.image);
+        await unlinkFile('users', user.image);
         user.image = file.filename;
     }
     
