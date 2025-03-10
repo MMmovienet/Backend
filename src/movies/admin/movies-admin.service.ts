@@ -22,7 +22,6 @@ export class MoviesAdminService {
         video: Express.Multer.File, 
         posters: Express.Multer.File[],
     ) {
-        console.log('***********************************')
         const genres = await Promise.all(
             createMovieDto.genres.map(async id => {
                 const genre = await this.genresService.findOne(id);
