@@ -1,6 +1,7 @@
 import { BaseEntity } from "src/common/database/base.entity";
 import { Genre } from "src/genres/entities/genre.entity";
-import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
+import { Poster } from "./poster.entity";
 
 
 @Entity("movies")
@@ -16,5 +17,8 @@ export class Movie extends BaseEntity<Movie> {
 
     @ManyToMany(() => Genre, (genre) => genre.movies, { cascade: true, onDelete: 'CASCADE'})
     @JoinTable({name: "movie_genres"})
-    genres: Genre[]
+    genres: Genre[];
+
+    @OneToMany(() => Poster, (poster) => poster.movie, {cascade: true})
+    posters: Poster[];
 }

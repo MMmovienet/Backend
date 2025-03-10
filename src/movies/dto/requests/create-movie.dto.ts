@@ -12,6 +12,10 @@ export class CreateMovieDto {
     @IsString({message: "Movie source is required"})
     src: Express.Multer.File;
 
+    @IsOptional()
+    @IsString({message: "Poster is required"})
+    posters: Express.Multer.File[];
+
     @Transform(({ value }) => { 
         if (typeof value === 'string') {
             return value.split(',').map(Number);
