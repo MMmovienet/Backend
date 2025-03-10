@@ -76,7 +76,7 @@ export class UsersAdminService {
     async remove(id: number): Promise<User> {
         const user = await this.findOne(id);
         if(user!.image) {
-            await unlinkFile('admins', user!.image);
+            await unlinkFile('users', user!.image);
         }
         await this.userRepository.remove(user!);
         return user;
