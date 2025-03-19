@@ -13,6 +13,7 @@ export class MoviesService {
 
     async findAll(query: PaginateQuery): Promise<Paginated<Movie>> {
         const config: PaginateConfig<Movie> = {
+            relations: ['genres', 'posters'],
             sortableColumns: ['id', 'name'],
             maxLimit: 10,
             defaultSortBy: [['createdAt', 'DESC']],
