@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { GenresModule } from './genres/genres.module';
 import { MoviesModule } from './movies/movies.module';
 import { ChatGateway } from './chat/chat.gateway';
+import { RedisService } from './redis/redis.service';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ChatGateway } from './chat/chat.gateway';
         MoviesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, IsUniqueConstraint, ChatGateway],
+  providers: [AppService, IsUniqueConstraint, ChatGateway, RedisService],
+  exports: [RedisService],
 })
 export class AppModule {}

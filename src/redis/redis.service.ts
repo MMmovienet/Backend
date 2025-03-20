@@ -1,0 +1,35 @@
+import { Injectable } from '@nestjs/common';
+import { Redis } from 'ioredis';
+
+const oneDayInSeconds = 60 * 60 * 24;
+const tenMinutesInSeconds = 60 * 10;
+
+@Injectable()
+export class RedisService {
+  private readonly redis: Redis;
+
+  constructor() {
+    this.redis = new Redis({
+      host: '127.0.0.1', 
+      port: 6379,
+    });
+  }
+
+  async addMessage(data: { id: number; room: string, username: string; message: string }) {
+    const key = data.room + "-chat";
+    await this.redis.rpush(key, JSON.stringify(data));
+    const ttl = await this.redis.ttl(key);
+    if (ttl === -1) {
+      await this.redis.expire(key, oneDayInSeconds);
+    }
+  }
+
+  async getMessages(room: string): Promise<{ id: number; room: string, username: string; message: string }[]> {
+    const messages = await this.redis.lrange(room + "-chat", 0, -1);
+    return messages.map((msg) => JSON.parse(msg));
+  }
+
+  async clearMessages(room: string) {
+    await this.redis.del(room + "-chat");
+  }
+}

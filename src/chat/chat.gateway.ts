@@ -7,12 +7,15 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { RedisService } from 'src/redis/redis.service';
   
 @WebSocketGateway({ cors: true })
 export class ChatGateway
 implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
     @WebSocketServer() server: Server;
+
+    constructor(private readonly redisService: RedisService) {}
   
     afterInit(server: Server) {
       console.log('WebSocket Initialized');
@@ -28,9 +31,10 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
     }
 
     @SubscribeMessage('joinRoom')
-    handleJoinRoom(client: Socket, room: string) {
+    async handleJoinRoom(client: Socket, room: string) {
         client.join(room);
-        client.emit('joinedRoom', room);
+        const messages = await this.redisService.getMessages(room);
+        client.emit('joinedRoom', messages);
     }
 
     @SubscribeMessage('leaveRoom')
@@ -40,7 +44,14 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
     }
 
     @SubscribeMessage('sendMessageToRoom')
-    handleMessage(client: Socket, data: { room: string; username: string, message: string }) {
-        this.server.to(data.room).emit('message', data);
+    async handleMessage(client: Socket, data: { room: string; username: string, message: string }) {
+        const formattedData = {
+            id: Date.now(),
+            room: data.room,
+            username: data.username,
+            message: data.message
+        };
+        await this.redisService.addMessage(formattedData);
+        this.server.to(data.room).emit('message', formattedData);
     }
 }
