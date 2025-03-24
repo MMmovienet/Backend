@@ -17,5 +17,6 @@ import { Poster } from './entities/poster.entity';
   ],
   controllers: [MoviesController, MoviesAdminController],
   providers: [MoviesService, MoviesAdminService],
+  exports: [MoviesService]
 })
 export class MoviesModule {}

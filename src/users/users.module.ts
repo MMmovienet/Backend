@@ -24,5 +24,6 @@ import { AdminModule } from 'src/admin/admin.module';
   ],
   controllers: [UsersController, UsersAdminController],
   providers: [UsersService, UsersAdminService],
+  exports: [UsersAdminService, JwtModule],
 })
 export class UsersModule {}

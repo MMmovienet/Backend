@@ -6,6 +6,7 @@ import {
     OnGatewayDisconnect,
     WebSocketServer,
 } from '@nestjs/websockets';
+import { time } from 'console';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from 'src/redis/redis.service';
   
@@ -35,6 +36,8 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
         client.join(room);
         const messages = await this.redisService.getMessages(room);
         client.emit('joinedRoom', messages);
+        const time = await this.redisService.getProgressTime(room);
+        client.emit('loadProgressTime', time)
     }
 
     @SubscribeMessage('leaveRoom')
@@ -53,5 +56,21 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
         };
         await this.redisService.addMessage(formattedData);
         this.server.to(data.room).emit('message', formattedData);
+    }
+
+    @SubscribeMessage('sendMovieAction')
+    handleMovieAction(client: Socket, data: {room: string, playingStatus: boolean}) {
+      this.server.to(data.room).emit('movieAction', data);
+    }
+
+    @SubscribeMessage('sendMovieSeekTime')
+    handleMovieSeekTime(client: Socket, data: {room: string, time: number}) {
+      this.server.to(data.room).emit('movieSeekTime', data);
+    }
+
+    @SubscribeMessage('sendMovieProgressTime')
+    async handleMovieProgressTime(client: Socket, data: {room: string, time: number}) {
+      console.log('******************', data.time)
+      await this.redisService.addProgressTime(data)
     }
 }

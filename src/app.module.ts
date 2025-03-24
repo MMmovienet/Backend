@@ -10,6 +10,7 @@ import { GenresModule } from './genres/genres.module';
 import { MoviesModule } from './movies/movies.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { RedisService } from './redis/redis.service';
+import { PartyModule } from './party/party.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RedisService } from './redis/redis.service';
         UsersModule,
         GenresModule,
         MoviesModule,
+        PartyModule,
   ],
   controllers: [AppController],
   providers: [AppService, IsUniqueConstraint, ChatGateway, RedisService],

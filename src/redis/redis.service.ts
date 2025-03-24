@@ -29,6 +29,20 @@ export class RedisService {
     return messages.map((msg) => JSON.parse(msg));
   }
 
+  async addProgressTime(data: { room: string, time: number }) {
+    const key = data.room + "-progress-time";
+    await this.redis.set(key, data.time);
+    const ttl = await this.redis.ttl(key);
+    if (ttl === -1) {
+      await this.redis.expire(key, oneDayInSeconds);
+    }
+  }
+
+  async getProgressTime(room: string): Promise<string | null> {
+    const time = await this.redis.get(room + "-progress-time");
+    return time;
+  }
+
   async clearMessages(room: string) {
     await this.redis.del(room + "-chat");
   }

@@ -30,3 +30,12 @@ export const unlinkFile = async (path: string, mediaName: string) => {
         console.error('Error deleting file:', error);
     }
 }
+
+export const getRandomCharsFromString = (name: string, num: number): string => {
+    const str = name.toUpperCase().replaceAll(" ", "");
+    return str
+        .split('')                      
+        .sort(() => Math.random() - 0.5) 
+        .slice(0, num)                   
+        .join('');                        
+}
