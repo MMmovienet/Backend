@@ -73,6 +73,10 @@ export class UsersAdminService {
         return user!;
     }
 
+    async find(email: string): Promise<User[]> {
+        return this.userRepository.find({where: {email}});
+    }
+
     async remove(id: number): Promise<User> {
         const user = await this.findOne(id);
         if(user!.image) {

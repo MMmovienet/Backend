@@ -22,9 +22,9 @@ export class PartyController {
     return this.partyService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.partyService.findOne(+id);
+  @Get(':partyId')
+  getParty(@Param('partyId') partyId: string) {
+    return this.partyService.getParty(partyId);
   }
 
   @Patch(':id')
