@@ -41,8 +41,12 @@ export class PartiesService {
         return `This action returns all party`;
     }
 
-    getParty(partyId: string) {
-        return this.partiesRepository.findOne({where: {partyId}, relations: ['movie', 'admin', 'members']});
+    async getParty(partyId: string) {
+        const party = await this.partiesRepository.findOne({where: {partyId}, relations: ['movie', 'admin', 'members']});
+        if(!party) {
+            throwCustomError('Party not found.');
+        }
+        return party;
     }
 
     async findOne(id: number): Promise<Party> {
