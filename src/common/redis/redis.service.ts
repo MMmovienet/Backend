@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
 
 const oneDayInSeconds = 60 * 60 * 24;
@@ -8,10 +9,10 @@ const tenMinutesInSeconds = 60 * 10;
 export class RedisService {
   private readonly redis: Redis;
 
-  constructor() {
+  constructor(configService: ConfigService) {
     this.redis = new Redis({
-      host: '127.0.0.1', 
-      port: 6379,
+      host: configService.get('REDIS_HOST'), 
+      port: configService.get('REDIS_PORT'),
     });
   }
 

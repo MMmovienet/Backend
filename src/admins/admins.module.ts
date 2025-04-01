@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AdminService } from './admin.service';
-import { AdminController } from './admin.controller';
-import { Admin } from './entities/admin.entity';
+import { AdminsService } from './admins.service';
+import { AdminsController } from './admins.controller';
+import { Admin } from '../admins/entities/admin.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -18,8 +18,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AdminController],
-  providers: [AdminService],
-  exports: [AdminService, JwtModule],
+  controllers: [AdminsController],
+  providers: [AdminsService],
+  exports: [AdminsService, JwtModule],
 })
-export class AdminModule {}
+export class AdminsModule {}

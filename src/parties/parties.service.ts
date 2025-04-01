@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePartyDto } from './dto/requests/create-party.dto';
-import { UpdatePartyDto } from './dto/requests/update-party.dto';
+import { CreatePartyDto } from '../parties/dto/requests/create-party.dto';
+import { UpdatePartyDto } from '../parties/dto/requests/update-party.dto';
 import { User } from 'src/users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Party } from './entities/party.entity';
+import { Party } from '../parties/entities/party.entity';
 import { Repository } from 'typeorm';
 import { MoviesService } from 'src/movies/movies.service';
 import { getRandomCharsFromString, throwCustomError } from 'src/common/helper';
 import { UsersAdminService } from 'src/users/admin/users-admin.service';
 
 @Injectable()
-export class PartyService {
+export class PartiesService {
     constructor(
-        @InjectRepository(Party) private partyRepository: Repository<Party>,
+        @InjectRepository(Party) private partiesRepository: Repository<Party>,
         private readonly moviesService: MoviesService,
         private readonly usersService: UsersAdminService,
     ) {}
@@ -28,13 +28,13 @@ export class PartyService {
 
     async create(createPartyDto: CreatePartyDto, user: User) {
         const movie = await this.moviesService.findOne(+createPartyDto.movieId);
-        const partyInstance = this.partyRepository.create({
+        const partyInstance = this.partiesRepository.create({
             partyId: this.generatePartyIdString(user.name),
             movie: movie!,
             admin: user,
             members: [user],
         });
-        return this.partyRepository.save(partyInstance);
+        return this.partiesRepository.save(partyInstance);
     }
 
     findAll() {
@@ -42,11 +42,11 @@ export class PartyService {
     }
 
     getParty(partyId: string) {
-        return this.partyRepository.findOne({where: {partyId}, relations: ['movie', 'admin', 'members']});
+        return this.partiesRepository.findOne({where: {partyId}, relations: ['movie', 'admin', 'members']});
     }
 
     async findOne(id: number): Promise<Party> {
-        const party = await this.partyRepository.findOne({where: {id}, relations: ['movie', 'admin', 'members']});
+        const party = await this.partiesRepository.findOne({where: {id}, relations: ['movie', 'admin', 'members']});
         if(!party) {
             throwCustomError('User not found.');
         }
@@ -61,7 +61,7 @@ export class PartyService {
         }
         if (!party.members.some(member => member.id === user.id)) {
             party.members.push(user);
-            return this.partyRepository.save(party);
+            return this.partiesRepository.save(party);
         } 
         throwCustomError('This user is already a member of the party.');
     }

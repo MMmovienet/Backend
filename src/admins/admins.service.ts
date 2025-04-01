@@ -1,20 +1,20 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateAdminDto } from './dto/requests/create-admin.dto';
-import { UpdateAdminDto } from './dto/requests/update-admin.dto';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { CreateAdminDto } from '../admins/dto/requests/create-admin.dto';
+import { UpdateAdminDto } from '../admins/dto/requests/update-admin.dto';
 import { generatePassword, throwCustomError, unlinkFile } from 'src/common/helper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
-import { Admin } from './entities/admin.entity';
+import { Admin } from '../admins/entities/admin.entity';
 import { paginate, PaginateConfig, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { JwtService } from '@nestjs/jwt';
-import { LoginAdminDto } from './dto/requests/login-admin.dto';
+import { LoginAdminDto } from '../admins/dto/requests/login-admin.dto';
 import { promisify } from 'util';
 import { scrypt as _scrypt } from 'crypto';
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
-export class AdminService {
+export class AdminsService {
   constructor(
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     private jwtService: JwtService,
@@ -101,7 +101,7 @@ export class AdminService {
     return {...user, access_token: token};
   }  
 
-  async generateToken(payload) { //  Error: secretOrPrivateKey must have a value
+  async generateToken(payload) {
     return this.jwtService.signAsync(payload);
   }
 }

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "src/common/database/base.entity";
-import { Party } from "src/party/entities/party.entity";
+import { Party } from "src/parties/entities/party.entity";
 
 @Entity("users")
 export class User extends BaseEntity<User> {

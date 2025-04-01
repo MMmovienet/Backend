@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { PartyService } from './party.service';
-import { PartyController } from './party.controller';
+import { PartiesService } from './parties.service';
+import { PartiesController } from './parties.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Party } from './entities/party.entity';
-import { MoviesModule } from 'src/movies/movies.module';
 import { UsersModule } from 'src/users/users.module';
+import { MoviesModule } from 'src/movies/movies.module';
 
 @Module({
     imports: [
@@ -12,7 +12,7 @@ import { UsersModule } from 'src/users/users.module';
         UsersModule,
         MoviesModule,
     ],
-    controllers: [PartyController],
-    providers: [PartyService],
+    controllers: [PartiesController],
+    providers: [PartiesService],
 })
-export class PartyModule {}
+export class PartiesModule {}

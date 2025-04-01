@@ -5,12 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Genre } from './entities/genre.entity';
 import { GenresAdminController } from './admin/genres-admin.controller';
 import { GenresAdminService } from './admin/genres-admin.service';
-import { AdminModule } from 'src/admin/admin.module';
+import { AdminsModule } from 'src/admins/admins.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Genre]),
-    AdminModule,
+    AdminsModule,
   ],
   controllers: [GenresController, GenresAdminController],
   providers: [GenresService, GenresAdminService],

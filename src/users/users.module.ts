@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersAdminController } from './admin/users-admin.controller';
 import { UsersAdminService } from './admin/users-admin.service';
-import { AdminModule } from 'src/admin/admin.module';
+import { AdminsModule } from 'src/admins/admins.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { AdminModule } from 'src/admin/admin.module';
       }),
       inject: [ConfigService],
     }),
-    AdminModule,
+    AdminsModule,
   ],
   controllers: [UsersController, UsersAdminController],
   providers: [UsersService, UsersAdminService],

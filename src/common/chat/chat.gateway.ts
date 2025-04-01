@@ -8,7 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { time } from 'console';
 import { Server, Socket } from 'socket.io';
-import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/common/redis/redis.service';
   
 @WebSocketGateway({ cors: true })
 export class ChatGateway
@@ -70,7 +70,6 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 
     @SubscribeMessage('sendMovieProgressTime')
     async handleMovieProgressTime(client: Socket, data: {room: string, time: number}) {
-      console.log('******************', data.time)
       await this.redisService.addProgressTime(data)
     }
 }

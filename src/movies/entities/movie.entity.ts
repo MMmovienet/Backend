@@ -2,7 +2,7 @@ import { BaseEntity } from "src/common/database/base.entity";
 import { Genre } from "src/genres/entities/genre.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { Poster } from "./poster.entity";
-import { Party } from "src/party/entities/party.entity";
+import { Party } from "src/parties/entities/party.entity";
 
 
 @Entity("movies")
