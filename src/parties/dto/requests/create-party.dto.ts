@@ -1,6 +1,11 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePartyDto {
-    @IsString({message: "Movie is required."})
+    @IsString()
+    @IsOptional()
     movieId: string;
+
+    @IsNumber()
+    @IsOptional()
+    episodeId: number;
 }

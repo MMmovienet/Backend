@@ -1,5 +1,6 @@
 import { Expose, Type } from "class-transformer";
 import { BaseDto } from "src/common/dto/base.dto";
+import { EpisodeDto } from "src/episodes/dto/responses/episode.dto";
 import { MovieDto } from "src/movies/dto/responses/movie.dto";
 import { UserDto } from "src/users/dto/responses/user.dto";
 
@@ -8,8 +9,18 @@ export class PartyDto extends BaseDto {
     partyId: string;
 
     @Expose()
+    title: string;
+
+    @Expose()
+    src: string;
+
+    @Expose()
     @Type(() => MovieDto)
     movie: MovieDto;
+
+    @Expose()
+    @Type(() => EpisodeDto)
+    episode: EpisodeDto;
 
     @Expose()
     @Type(() => UserDto)

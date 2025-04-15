@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreatePartyDto } from '../parties/dto/requests/create-party.dto';
 import { UpdatePartyDto } from '../parties/dto/requests/update-party.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -8,29 +8,54 @@ import { Repository } from 'typeorm';
 import { MoviesService } from 'src/movies/movies.service';
 import { getRandomCharsFromString, throwCustomError } from 'src/common/helper';
 import { UsersAdminService } from 'src/users/admin/users-admin.service';
+import { EpisodesAdminService } from 'src/episodes/admin/episodes-admin.service';
 
 @Injectable()
 export class PartiesService {
     constructor(
         @InjectRepository(Party) private partiesRepository: Repository<Party>,
         private readonly moviesService: MoviesService,
+        private readonly episodesAdminService: EpisodesAdminService,
         private readonly usersService: UsersAdminService,
     ) {}
 
-    generatePartyIdString(name: string): string {
+    async generatePartyIdString(name: string): Promise<string> {
         const randomFourCharsFromName = getRandomCharsFromString(name, 4);
         const str = randomFourCharsFromName + Date.now().toString();
-        return str
+        const partyIdString = str
             .split('')                     
             .sort(() => Math.random() - 0.5) 
             .join(''); 
+        const party = await this.partiesRepository.findOne({where: {partyId: partyIdString}});
+        if(party) {
+            return this.generatePartyIdString(name)
+        }
+        return partyIdString;
     }
 
     async create(createPartyDto: CreatePartyDto, user: User) {
-        const movie = await this.moviesService.findOne(+createPartyDto.movieId);
+        const movie = createPartyDto.movieId ? (await this.moviesService.findOne(+createPartyDto.movieId))! : undefined;
+        const episode = createPartyDto.episodeId ? (await this.episodesAdminService.findOne(+createPartyDto.episodeId))! : undefined;
+        if ((!movie && !episode) || (movie && episode)) {
+            throwCustomError('Either movieId or episodeId must be provided');
+        }
+        let title;
+        let src;
+        if(movie) {
+            title = movie.name;
+            src = `${process.env.APP_URL}/uploads/movies/${movie.src}`;
+        }
+        if(episode) {
+            title = `${episode.serie.name} (${episode.season ? episode.season.name + ' - ' : ''} ${episode.name})`;
+            src = `${process.env.APP_URL}/uploads/series/episodes/${episode.src}`;
+        }
+
         const partyInstance = this.partiesRepository.create({
-            partyId: this.generatePartyIdString(user.name),
-            movie: movie!,
+            partyId: await this.generatePartyIdString(user.name),
+            title: title,
+            src: src,
+            movie: movie,
+            episode: episode,
             admin: user,
             members: [user],
         });
@@ -42,7 +67,7 @@ export class PartiesService {
     }
 
     async getParty(partyId: string) {
-        const party = await this.partiesRepository.findOne({where: {partyId}, relations: ['movie', 'admin', 'members']});
+        const party = await this.partiesRepository.findOne({where: {partyId}, relations: ['movie', 'episode', 'admin', 'members']});
         if(!party) {
             throwCustomError('Party not found.');
         }
@@ -50,7 +75,7 @@ export class PartiesService {
     }
 
     async findOne(id: number): Promise<Party> {
-        const party = await this.partiesRepository.findOne({where: {id}, relations: ['movie', 'admin', 'members']});
+        const party = await this.partiesRepository.findOne({where: {id}, relations: ['movie', 'episode', 'admin', 'members']});
         if(!party) {
             throwCustomError('User not found.');
         }

@@ -1,0 +1,23 @@
+import { Expose, Transform, Type } from "class-transformer";
+import { BaseDto } from "src/common/dto/base.dto";
+
+export class EpisodeDto extends BaseDto {
+    @Expose()
+    number: number;
+
+    @Expose()
+    name: string;
+
+    @Expose()
+    description: string;
+
+    @Expose()
+    @Transform(({value}) => `${process.env.APP_URL}/uploads/series/episodes/${value}`)
+    src: string;
+
+    @Expose()
+    serieId: number;
+
+    @Expose()
+    seasonId: number;
+}

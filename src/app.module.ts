@@ -11,6 +11,9 @@ import { ChatGateway } from './common/chat/chat.gateway';
 import { RedisService } from './common/redis/redis.service';
 import { AdminsModule } from './admins/admins.module';
 import { PartiesModule } from './parties/parties.module';
+import { SeriesModule } from './series/series.module';
+import { EpisodesModule } from './episodes/episodes.module';
+import { SeasonsModule } from './seasons/seasons.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { PartiesModule } from './parties/parties.module';
         GenresModule,
         MoviesModule,
         PartiesModule,
+        SeriesModule,
+        EpisodesModule,
+        SeasonsModule,
   ],
   controllers: [AppController],
   providers: [AppService, IsUniqueConstraint, ChatGateway, RedisService],
