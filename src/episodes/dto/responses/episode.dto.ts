@@ -1,5 +1,7 @@
 import { Expose, Transform, Type } from "class-transformer";
 import { BaseDto } from "src/common/dto/base.dto";
+import { SeasonDto } from "src/seasons/dto/responses/season.dto";
+import { SerieDto } from "src/series/dto/responses/serie.dto";
 
 export class EpisodeDto extends BaseDto {
     @Expose()
@@ -20,4 +22,12 @@ export class EpisodeDto extends BaseDto {
 
     @Expose()
     seasonId: number;
+
+    @Expose()
+    @Type(() => SerieDto)
+    serie: SerieDto;
+
+    @Expose()
+    @Type(() => SeasonDto)
+    season: SeasonDto;
 }
