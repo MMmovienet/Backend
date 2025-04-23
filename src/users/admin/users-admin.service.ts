@@ -66,7 +66,7 @@ export class UsersAdminService {
     }
 
     async findOne(id: number): Promise<User> {
-        const user = await this.userRepository.findOne({where: {id}}); 
+        const user = await this.userRepository.findOne({where: {id}, relations: ['parties', 'member_parties']}); 
         if(!user) {
             throwCustomError('User not found.');
         }

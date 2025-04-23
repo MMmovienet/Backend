@@ -8,13 +8,20 @@ export class CreateMovieDto {
     @IsString({message: "Movie description is required"})
     description: string;
 
+    @IsString({message: "Release date is required"})
+    release_date: string;
+
     @IsOptional()
     @IsString({message: "Movie source is required"})
     src: Express.Multer.File;
 
     @IsOptional()
     @IsString({message: "Poster is required"})
-    posters: Express.Multer.File[];
+    main_poster: Express.Multer.File;
+
+    @IsOptional()
+    @IsString()
+    cover_poster: Express.Multer.File;
 
     @Transform(({ value }) => { 
         if (typeof value === 'string') {

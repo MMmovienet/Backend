@@ -15,11 +15,11 @@ export class SerieDto extends BaseDto {
     release_date: string;
 
     @Expose()
-    @Transform(({value}) => `${process.env.APP_URL}/uploads/series/posters/${value}`)
+    @Transform(({value}) => `${process.env.APP_URL}/uploads/posters/${value}`)
     main_poster: string;
 
     @Expose()
-    @Transform(({value}) => value ? `${process.env.APP_URL}/uploads/series/posters/${value}` : null)
+    @Transform(({value}) => value ? `${process.env.APP_URL}/uploads/posters/${value}` : null)
     cover_poster?: string;
 
     @Expose()

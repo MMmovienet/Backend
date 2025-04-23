@@ -14,7 +14,7 @@ export class EpisodeDto extends BaseDto {
     description: string;
 
     @Expose()
-    @Transform(({value}) => `${process.env.APP_URL}/uploads/series/episodes/${value}`)
+    @Transform(({value}) => `${process.env.APP_URL}/uploads/movies/${value}`)
     src: string;
 
     @Expose()

@@ -86,8 +86,8 @@ export class SeriesAdminService {
                 return genre;
             }),
         );  
-        if(main_poster) await unlinkFile('series/posters', serie.main_poster);
-        if(cover_poster && serie.cover_poster) await unlinkFile('series/posters', serie.cover_poster);
+        if(main_poster) await unlinkFile('posters', serie.main_poster);
+        if(cover_poster && serie.cover_poster) await unlinkFile('posters', serie.cover_poster);
 
         Object.assign(serie, {
             name: updateSerieDto && updateSerieDto.name ? updateSerieDto.name : serie.name,
@@ -104,10 +104,10 @@ export class SeriesAdminService {
     async remove(id: number) {
         const serie = await this.findOne(id);
 
-        await unlinkFile('series/posters', serie.main_poster);
-        if(serie.cover_poster) await unlinkFile('series/posters', serie.cover_poster);
+        await unlinkFile('posters', serie.main_poster);
+        if(serie.cover_poster) await unlinkFile('posters', serie.cover_poster);
         await Promise.all(serie.episodes.map( async (episode) => {
-            await unlinkFile('series/episodes', episode.src);
+            await unlinkFile('movies', episode.src);
         }))
 
         await this.serieRepository.remove(serie);

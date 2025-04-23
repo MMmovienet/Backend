@@ -4,7 +4,7 @@ import { CreateMovieDto } from "../dto/requests/create-movie.dto";
 import { UpdateMovieDto } from "../dto/requests/update-movie.dto";
 import { Paginate, Paginated, PaginateQuery } from "nestjs-paginate";
 import { Movie } from "../entities/movie.entity";
-import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname } from "path";
 import { AdminGuard } from "src/common/guards/admin.guard";
@@ -25,7 +25,8 @@ export class MoviesAdminController {
     @Post()
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'src', maxCount: 1 }, 
-        { name: 'posters', maxCount: 8 }, 
+        { name: 'main_poster', maxCount: 1 }, 
+        { name: 'cover_poster', maxCount: 1 }, 
     ], {
         storage: diskStorage({
             destination: (req, file, cb) => {
@@ -46,23 +47,20 @@ export class MoviesAdminController {
     }))
     create(
         @Body() createMovieDto: CreateMovieDto, 
-        @UploadedFiles() files: { src: Express.Multer.File; posters: Express.Multer.File[] },
+        @UploadedFiles() files: { src: Express.Multer.File; main_poster: Express.Multer.File; cover_poster: Express.Multer.File },
     ) {
-        return this.moviesService.create(createMovieDto, files.src, files.posters);
+        return this.moviesService.create(createMovieDto, files.src, files.main_poster, files.cover_poster);
     }
 
     @Patch(':id')
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'src', maxCount: 1 }, 
-        { name: 'posters', maxCount: 8 }, 
+        { name: 'main_poster', maxCount: 1 }, 
+        { name: 'cover_poster', maxCount: 1 }, 
     ], {
         storage: diskStorage({
             destination: (req, file, cb) => {
-                if (file.fieldname === 'src') {
-                    cb(null, './uploads/movies');
-                } else if (file.fieldname === 'posters') {
-                    cb(null, './uploads/posters');
-                }
+                file.fieldname === 'src' ? cb(null, './uploads/movies') : cb(null, './uploads/posters')
             },
             filename: (req, file, cb) => {
                 const randomName = Array(32)
@@ -76,9 +74,10 @@ export class MoviesAdminController {
     update(
         @Param('id') id: string, 
         @Body() updateMovieDto: UpdateMovieDto, 
-        @UploadedFiles() files: { src: Express.Multer.File; posters: Express.Multer.File[] },
+        @UploadedFiles() files: { src: Express.Multer.File; main_poster: Express.Multer.File; cover_poster: Express.Multer.File },
     ) {
-        return this.moviesService.update(+id, updateMovieDto, files.src, files.posters);
+        console.log('******************************')
+        return this.moviesService.update(+id, updateMovieDto, files.src, files.main_poster, files.cover_poster);
     }
 
     @Get('all')

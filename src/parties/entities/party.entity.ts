@@ -15,6 +15,9 @@ export class Party extends BaseEntity<Party> {
     @Column()
     src: string;
 
+    @Column()
+    poster: string;
+
     @ManyToOne(() => Movie, (movie) => movie.parties, {onDelete: "CASCADE", nullable: true},)
     movie: Movie;
 
@@ -24,6 +27,6 @@ export class Party extends BaseEntity<Party> {
     @ManyToOne(() => User, (admin) => admin.parties, {onDelete: "CASCADE", nullable: false})
     admin: User;
 
-    @ManyToMany(() => User, (user) => user.member_parties)
+    @ManyToMany(() => User, (user) => user.member_parties, {onDelete: "CASCADE"})
     members: User[];
 }

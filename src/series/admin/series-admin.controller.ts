@@ -43,7 +43,7 @@ export class SeriesAdminController {
     ], {
         storage: diskStorage({
             destination: (req, file, cb) => {
-                const uploadPath = './uploads/series/posters';
+                const uploadPath = './uploads/posters';
                 if (!existsSync(uploadPath)) {
                     mkdirSync(uploadPath, { recursive: true });
                 }
@@ -73,7 +73,7 @@ export class SeriesAdminController {
     ], {
         storage: diskStorage({
             destination: (req, file, cb) => {
-                cb(null, './uploads/series/posters');
+                cb(null, './uploads/posters');
             },
             filename: (req, file, cb) => {
                 const randomName = Array(32)
@@ -113,7 +113,7 @@ export class SeriesAdminController {
         FileInterceptor('src', {
             storage: diskStorage({
                 destination: (req, file, cb) => {
-                    cb(null, './uploads/series/episodes');
+                    cb(null, './uploads/movies');
                 },
                 filename: (req, file, cb) => {
                     const randomName = Array(32)

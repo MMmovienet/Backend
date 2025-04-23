@@ -11,8 +11,19 @@ export class MovieDto extends BaseDto {
     description: string;
 
     @Expose()
+    release_date: string;
+
+    @Expose()
     @Transform(({value}) => `${process.env.APP_URL}/uploads/movies/${value}`)
     src: string;
+
+    @Expose()
+    @Transform(({value}) => `${process.env.APP_URL}/uploads/posters/${value}`)
+    main_poster: string;
+
+    @Expose()
+    @Transform(({value}) => value ? `${process.env.APP_URL}/uploads/posters/${value}` : null)
+    cover_poster?: string;
 
     @Expose()
     @Type(() => GenreDto)

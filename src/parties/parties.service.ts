@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreatePartyDto } from '../parties/dto/requests/create-party.dto';
 import { UpdatePartyDto } from '../parties/dto/requests/update-party.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -41,23 +41,26 @@ export class PartiesService {
         }
         let title;
         let src;
+        let poster;
         if(movie) {
             title = movie.name;
-            src = `${process.env.APP_URL}/uploads/movies/${movie.src}`;
+            src = movie.src;
+            poster = movie.main_poster;
         }
         if(episode) {
             title = `${episode.serie.name} (${episode.season ? episode.season.name + ' - ' : ''} ${episode.name})`;
-            src = `${process.env.APP_URL}/uploads/series/episodes/${episode.src}`;
+            src = episode.src;
+            poster = episode.serie.main_poster;
         }
 
         const partyInstance = this.partiesRepository.create({
             partyId: await this.generatePartyIdString(user.name),
             title: title,
             src: src,
+            poster: poster,
             movie: movie,
             episode: episode,
             admin: user,
-            members: [user],
         });
         return this.partiesRepository.save(partyInstance);
     }

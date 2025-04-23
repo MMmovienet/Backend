@@ -13,7 +13,7 @@ export class MoviesService {
 
     async findAll(query: PaginateQuery): Promise<Paginated<Movie>> {
         const config: PaginateConfig<Movie> = {
-            relations: ['genres', 'posters'],
+            relations: ['genres'],
             sortableColumns: ['id', 'name'],
             maxLimit: 10,
             defaultSortBy: [['createdAt', 'DESC']],
@@ -24,7 +24,7 @@ export class MoviesService {
     }
 
   async findOne(id: number) {
-    const movie = await this.movieRepository.findOne({where: {id}, relations: ['genres', 'posters']});
+    const movie = await this.movieRepository.findOne({where: {id}, relations: ['genres']});
     if(!movie) {
       throwCustomError("Movie not found.")
     }
