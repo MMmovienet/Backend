@@ -16,6 +16,34 @@ export class RedisService {
     });
   }
 
+  async joinParty(partyId: string) {
+    const parties = await this.getParties();
+    if(parties[partyId]) {
+      await this.redis.hset('parties', partyId, +parties[partyId] + 1)
+    }else {
+      await this.redis.hset('parties', {[partyId]: 1});
+    }
+  }
+
+  async leaveParty(partyId: string) {
+    const parties = await this.getParties();
+    if(parties[partyId] && +parties[partyId] == 1) {
+      await this.redis.hdel('parties', partyId)
+    }else if(parties[partyId]) {
+      await this.redis.hset('parties', partyId, +parties[partyId] - 1)
+    }
+  }
+
+  async getParties(): Promise<object> { 
+    const parties = await this.redis.hgetall('parties');
+    return parties
+  }
+
+    async getPartyIds(): Promise<string[]> { 
+    const ids = await this.redis.hkeys('parties');
+    return ids
+  }
+
   async addMessage(data: { id: number; room: string, username: string; message: string }) {
     const key = data.room + "-chat";
     await this.redis.rpush(key, JSON.stringify(data));

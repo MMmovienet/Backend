@@ -7,13 +7,14 @@ import { IsUniqueConstraint } from './common/validators/is-unique.constraint ';
 import { UsersModule } from './users/users.module';
 import { GenresModule } from './genres/genres.module';
 import { MoviesModule } from './movies/movies.module';
-import { ChatGateway } from './common/chat/chat.gateway';
+import { ChatGateway } from './common/realtime/chat.gateway';
 import { RedisService } from './common/redis/redis.service';
 import { AdminsModule } from './admins/admins.module';
 import { PartiesModule } from './parties/parties.module';
 import { SeriesModule } from './series/series.module';
 import { EpisodesModule } from './episodes/episodes.module';
 import { SeasonsModule } from './seasons/seasons.module';
+import { AdminRealtimeGateway } from './common/realtime/admin-realtime.gateway';
 
 @Module({
   imports: [
@@ -29,7 +30,13 @@ import { SeasonsModule } from './seasons/seasons.module';
         SeasonsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, IsUniqueConstraint, ChatGateway, RedisService],
+  providers: [
+    AppService, 
+    IsUniqueConstraint, 
+    ChatGateway, 
+    AdminRealtimeGateway,
+    RedisService
+  ],
   exports: [RedisService],
 })
 export class AppModule {}

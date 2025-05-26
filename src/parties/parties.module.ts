@@ -20,5 +20,6 @@ import { AdminsModule } from 'src/admins/admins.module';
     ],
     controllers: [PartiesController, PartiesAdminController],
     providers: [PartiesService, PartiesAdminService],
+    exports: [PartiesAdminService],
 })
 export class PartiesModule {}

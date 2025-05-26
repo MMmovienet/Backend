@@ -6,9 +6,9 @@ import {
     OnGatewayDisconnect,
     WebSocketServer,
 } from '@nestjs/websockets';
-import { time } from 'console';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from 'src/common/redis/redis.service';
+import { AdminRealtimeGateway } from './admin-realtime.gateway';
   
 @WebSocketGateway({ cors: true })
 export class ChatGateway
@@ -16,7 +16,10 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
     @WebSocketServer() server: Server;
 
-    constructor(private readonly redisService: RedisService) {}
+    constructor(
+      private readonly redisService: RedisService,
+      private readonly adminRealtimeGateway: AdminRealtimeGateway,
+    ) {}
   
     afterInit(server: Server) {
       console.log('WebSocket Initialized');
@@ -26,7 +29,7 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
       console.log(`Client connected: ${client.id}`);
       this.server.emit('conn', 'payload');
     }
-  
+    
     handleDisconnect(client: Socket) {
       console.log(`Client disconnected: ${client.id}`);
     }
@@ -38,12 +41,21 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
         client.emit('joinedRoom', messages);
         const time = await this.redisService.getProgressTime(room);
         client.emit('loadProgressTime', time)
+        
+        await this.redisService.joinParty(room)
+        setTimeout(async () => {
+          const parties = await this.adminRealtimeGateway.getPartiesFromDB();
+          this.server.to('admin').emit('onParty', parties)
+        }, 3000);
     }
 
     @SubscribeMessage('leaveRoom')
-    handleLeaveRoom(client: Socket, room: string) {
+    async handleLeaveRoom(client: Socket, room: string) {
         client.leave(room);
         client.emit('leftRoom', room);
+        await this.redisService.leaveParty(room);
+        const parties = await this.adminRealtimeGateway.getPartiesFromDB();
+        this.server.to('admin').emit('onParty', parties)
     }
 
     @SubscribeMessage('sendMessageToRoom')

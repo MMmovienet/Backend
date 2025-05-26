@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Party } from "../entities/party.entity";
 import { paginate, PaginateConfig, Paginated, PaginateQuery } from "nestjs-paginate";
 import { throwCustomError } from "src/common/helper";
@@ -29,5 +29,15 @@ export class PartiesAdminService {
             throwCustomError("Party not found.")
         }
         return party!;
+    }
+
+    async findByPartyIds(ids: string[]) {
+        const parties = await this.partiesAdminRepository.find({
+            where: {
+                partyId: In(ids),
+            },
+            relations: ['admin', 'members']
+        });
+        return parties;
     }
 }
