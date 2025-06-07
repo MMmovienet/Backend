@@ -30,4 +30,13 @@ export class MoviesService {
     }
     return movie;
   }
+
+  async search(keyword: string) {
+    const movies = await this.movieRepository
+                          .createQueryBuilder('movie')
+                          .select(['movie.id', 'movie.name', 'movie.main_poster', 'movie.release_date'])
+                          .where("movie.name LIKE :name", {name: `%${keyword}%`})
+                          .getMany();
+    return movies;
+  }
 }

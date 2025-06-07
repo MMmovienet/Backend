@@ -2,6 +2,7 @@
 import { BaseEntity } from 'src/common/database/base.entity';
 import { Episode } from 'src/episodes/entities/episode.entity';
 import { Genre } from 'src/genres/entities/genre.entity';
+import { Post } from 'src/posts/entities/post.entity';
 import { Season } from 'src/seasons/entities/season.entity';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 
@@ -31,4 +32,7 @@ export class Serie extends BaseEntity<Serie> {
 
     @OneToMany(() => Episode, (episode) => episode.serie, {cascade: true})
     episodes: Episode[];
+
+    @OneToMany(() => Post, (post) => post.serie, {cascade: true})
+    posts: Post[];
 }

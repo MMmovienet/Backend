@@ -35,4 +35,13 @@ export class SeriesService {
     async getEpisode(serieId: number, episodeId: number) {
         return this.episodesAdminService.getExactEpisode(serieId, episodeId);
     }
+
+    async search(keyword: string) {
+        const series = await this.serieRepository
+                            .createQueryBuilder('serie')
+                            .select(['serie.id', 'serie.name', 'serie.main_poster', 'serie.release_date'])
+                            .where("serie.name LIKE :name", {name: `%${keyword}%`})
+                            .getMany();
+        return series;
+    }
 }

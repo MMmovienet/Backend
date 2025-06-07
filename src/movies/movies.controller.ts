@@ -19,4 +19,9 @@ export class MoviesController {
   findOne(@Param('id') id: string) {
     return this.moviesService.findOne(+id);
   }
+
+  @Get('/search/:keyword')
+  search(@Param('keyword') keyword: string) {
+    return this.moviesService.search(keyword);
+  }
 }

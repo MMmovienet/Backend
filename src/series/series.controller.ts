@@ -27,4 +27,10 @@ export class SeriesController {
   getEpisode(@Param('id') id: string, @Param('episodeId') episodeId: string) {
     return this.seriesService.getEpisode(+id, +episodeId)
   }
+
+  @Get('/search/:keyword')
+  @Serialize(SerieDto)
+  search(@Param('keyword') keyword: string) {
+    return this.seriesService.search(keyword);
+  }
 }

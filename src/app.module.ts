@@ -15,6 +15,7 @@ import { SeriesModule } from './series/series.module';
 import { EpisodesModule } from './episodes/episodes.module';
 import { SeasonsModule } from './seasons/seasons.module';
 import { AdminRealtimeGateway } from './common/realtime/admin-realtime.gateway';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AdminRealtimeGateway } from './common/realtime/admin-realtime.gateway';
         SeriesModule,
         EpisodesModule,
         SeasonsModule,
+        PostsModule,
   ],
   controllers: [AppController],
   providers: [

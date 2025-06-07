@@ -16,6 +16,6 @@ import { MoviesAdminService } from './admin/movies-admin.service';
   ],
   controllers: [MoviesController, MoviesAdminController],
   providers: [MoviesService, MoviesAdminService],
-  exports: [MoviesService]
+  exports: [MoviesService, MoviesAdminService]
 })
 export class MoviesModule {}

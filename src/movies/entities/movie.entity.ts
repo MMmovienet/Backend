@@ -2,6 +2,7 @@ import { BaseEntity } from "src/common/database/base.entity";
 import { Genre } from "src/genres/entities/genre.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { Party } from "src/parties/entities/party.entity";
+import { Post } from "src/posts/entities/post.entity";
 
 
 @Entity("movies")
@@ -30,4 +31,7 @@ export class Movie extends BaseEntity<Movie> {
 
     @OneToMany(() => Party, (party) => party.movie, {cascade: true})
     parties: Party[];
+
+    @OneToMany(() => Post, (post) => post.movie, {cascade: true})
+    posts: Post[];
 }
