@@ -23,26 +23,30 @@ export class PostsController {
     }
 
     @Get(':id')
+    @Serialize(PostDto) 
     findOne(@Param('id') id: string) {
         return this.postsService.findOne(+id);
     }
 
     @Post()
+    @Serialize(PostDto) 
     @UseGuards(UserGuard)
     create(@Body() createPostDto: CreatePostDto, @Request() req) {
         return this.postsService.create(createPostDto, req.user);
     }
 
     @Patch(':id')
+    @Serialize(PostDto) 
     @UseGuards(UserGuard)
-    update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-        return this.postsService.update(+id, updatePostDto);
+    update(@Param('id') id: string, @Request() req, @Body() updatePostDto: UpdatePostDto) {
+        return this.postsService.update(+id, req.user, updatePostDto);
     }
 
     @Delete(':id')
+    @Serialize(PostDto) 
     @UseGuards(UserGuard)
-    remove(@Param('id') id: string) {
-        return this.postsService.remove(+id);
+    remove(@Param('id') id: string, @Request() req) {
+        return this.postsService.remove(+id, req.user);
     }
 
     @Post(':id/vote')

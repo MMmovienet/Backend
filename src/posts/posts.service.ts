@@ -45,23 +45,26 @@ export class PostsService {
         return this.postRepository.save(postInstance);
     }
 
-    async update(id: number, updatePostDto: UpdatePostDto) {
-        const post = await this.findOne(id); 
+    async update(id: number, user: User, updatePostDto: UpdatePostDto) {
+        const post = await this.postRepository.findOne({where: {id: id, user: {id: user.id}}}); 
+        if(!post) {
+            throwCustomError("Post not found.")
+        }
         const isValidId = updatePostDto.movieId || updatePostDto.serieId;
-        let movie = isValidId ? null: post.movie;
-        let serie = isValidId ? null: post.serie;
+        let movie = isValidId ? null: post!.movie;
+        let serie = isValidId ? null: post!.serie;
         if(updatePostDto.movieId) {
             movie = await this.moviesAdminService.findOne(updatePostDto.movieId);
         }
         if(updatePostDto.serieId) {
             serie = await this.seriesAdminService.findOne(updatePostDto.serieId);
         }
-        Object.assign(post, {
-            text: updatePostDto.text ? updatePostDto.text : post.text,
+        Object.assign(post!, {
+            text: updatePostDto.text ? updatePostDto.text : post!.text,
             movie: movie,
             serie: serie,
         });
-        return this.postRepository.save(post);
+        return this.postRepository.save(post!);
     }
 
     async findAll(query: PaginateQuery): Promise<Paginated<Post>> {
@@ -86,9 +89,11 @@ export class PostsService {
                 qb => qb.andWhere('vote.type = :type', { type: 'DOWN' })
             )
         const config: PaginateConfig<Post> = {
+            relations: ['movie', 'serie'],
             sortableColumns: ['id'],
             maxLimit: 10,
             defaultSortBy: [['createdAt', 'DESC']],
+            searchableColumns: ['movie.name', 'serie.name']
         }
         query.limit = query.limit == 0 ? 10 : query.limit;
         const result = await paginate<Post>(query, queryBuilder, config);
@@ -103,9 +108,12 @@ export class PostsService {
         return post!;
     }
 
-    async remove(id: number) {
-        const post = await this.findOne(id);
-        await this.postRepository.remove(post);
+    async remove(id: number, user: User) {
+        const post = await this.postRepository.findOne({where: {id: id, user: {id: user.id}}});
+        if(!post) {
+            throwCustomError("Post not found.")
+        }
+        await this.postRepository.remove(post!);
         return post; 
     }
 
