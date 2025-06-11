@@ -14,7 +14,7 @@ export class MovieDto extends BaseDto {
     release_date: string;
 
     @Expose()
-    @Transform(({value}) => `${process.env.APP_URL}/uploads/movies/${value}`)
+    @Transform(({value}) => `${process.env.APP_URL}/movies/${value}/watch`)
     src: string;
 
     @Expose()
