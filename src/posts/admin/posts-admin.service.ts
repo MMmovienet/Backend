@@ -20,59 +20,61 @@ export class PostsAdminService {
         private readonly seriesAdminService: SeriesAdminService,
     ){}
 
-    async create(createPostDto: CreatePostDto, user: User) {
-        let movie;
-        let serie;
-        if(createPostDto.movieId) {
-            movie = await this.moviesAdminService.findOne(createPostDto.movieId);
-        }
-        if(createPostDto.serieId) {
-            serie = await this.seriesAdminService.findOne(createPostDto.serieId);
-        }
-        if(!createPostDto.movieId && !createPostDto.serieId) {
-            throwCustomError("Please select movie or serie")
-        }
-        const postInstance = this.postRepository.create({
-            text: createPostDto.text,
-            user: user,
-            movie: movie,
-            serie: serie,
-        });
-        return this.postRepository.save(postInstance);
-    }
-
-    async update(id: number, updatePostDto: UpdatePostDto) {
-        const post = await this.findOne(id); 
-        const isValidId = updatePostDto.movieId || updatePostDto.serieId;
-        let movie = isValidId ? null: post.movie;
-        let serie = isValidId ? null: post.serie;
-        if(updatePostDto.movieId) {
-            movie = await this.moviesAdminService.findOne(updatePostDto.movieId);
-        }
-        if(updatePostDto.serieId) {
-            serie = await this.seriesAdminService.findOne(updatePostDto.serieId);
-        }
-        Object.assign(post, {
-            text: updatePostDto.text ? updatePostDto.text : post.text,
-            movie: movie,
-            serie: serie,
-        });
-        return this.postRepository.save(post);
-    }
-
     async findAll(query: PaginateQuery): Promise<Paginated<Post>> {
+        const queryBuilder = await this.postRepository
+            .createQueryBuilder('post')
+            .leftJoin('post.user', 'user') 
+            .addSelect(['user.name', 'user.image']) 
+            .leftJoin('post.movie', 'movie')
+            .addSelect(['movie.id', 'movie.name', 'movie.main_poster']) 
+            .leftJoin('post.serie', 'serie')
+            .addSelect(['serie.id', 'serie.name', 'serie.main_poster']) 
+            .loadRelationCountAndMap(
+                'post.upvoteCount',
+                'post.votes',
+                'vote',
+                qb => qb.andWhere('vote.type = :type', { type: 'UP' })
+            )
+            .loadRelationCountAndMap(
+                'post.downvoteCount',
+                'post.votes',
+                'vote',
+                qb => qb.andWhere('vote.type = :type', { type: 'DOWN' })
+            )
         const config: PaginateConfig<Post> = {
+            relations: ['movie', 'serie'],
             sortableColumns: ['id'],
             maxLimit: 10,
             defaultSortBy: [['createdAt', 'DESC']],
+            searchableColumns: ['movie.name', 'serie.name']
         }
         query.limit = query.limit == 0 ? 10 : query.limit;
-        const result = await paginate<Post>(query, this.postRepository, config);
+        const result = await paginate<Post>(query, queryBuilder, config);
         return result;
     }
 
     async findOne(id: number) {
-        const post = await this.postRepository.findOne({where: {id}, relations: ['user', 'movie', 'serie']});
+        const post = await this.postRepository
+            .createQueryBuilder('post')
+            .where('post.id = :id', {id})
+            .leftJoin('post.user', 'user') 
+            .addSelect(['user.id', 'user.name', 'user.image']) 
+            .leftJoin('post.movie', 'movie')
+            .addSelect(['movie.id', 'movie.name', 'movie.main_poster']) 
+            .leftJoin('post.serie', 'serie')
+            .addSelect(['serie.id', 'serie.name', 'serie.main_poster']) 
+            .loadRelationCountAndMap(
+                'post.upvoteCount',
+                'post.votes',
+                'vote',
+                qb => qb.andWhere('vote.type = :type', { type: 'UP' })
+            )
+            .loadRelationCountAndMap(
+                'post.downvoteCount',
+                'post.votes',
+                'vote',
+                qb => qb.andWhere('vote.type = :type', { type: 'DOWN' })
+            ).getOne()
         if(!post) {
             throwCustomError("Post not found.")
         }

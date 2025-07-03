@@ -1,14 +1,9 @@
 import { Expose, Transform } from "class-transformer";
 import { BaseDto } from "src/common/dto/base.dto";
-import { formatDistanceToNow } from "date-fns";
 import { Movie } from "src/movies/entities/movie.entity";
 import { Serie } from "src/series/entities/serie.entity";
 
 export class PostDto extends BaseDto {
-    @Expose()
-    @Transform(({ value }) => value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : null)
-    createdAt: Date;
-
     @Expose()
     text: string;
 
@@ -20,16 +15,22 @@ export class PostDto extends BaseDto {
 
     @Expose()
     @Transform((data) => {
-        return data.obj.user.name;
+        return data.obj.user?.name;
     })
     username: string;
 
     @Expose()
     @Transform((data) => {
+        return data.obj.user?.id;
+    })
+    userId: number;
+
+    @Expose()
+    @Transform((data) => {
         const user = data.obj.user;
-        return user.image ? 
+        return user && user.image ? 
                 `${process.env.APP_URL}/uploads/users/${user.image}`: 
-                `https://ui-avatars.com/api/?background=222E41&color=fff&name=${user.name}`;
+                `https://ui-avatars.com/api/?background=222E41&color=fff&name=${user?.name}`;
     })
     userImage: string;
 

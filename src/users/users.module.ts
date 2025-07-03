@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersAdminController } from './admin/users-admin.controller';
 import { UsersAdminService } from './admin/users-admin.service';
 import { AdminsModule } from 'src/admins/admins.module';
+import { PostsModule } from 'src/posts/posts.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AdminsModule } from 'src/admins/admins.module';
       inject: [ConfigService],
     }),
     AdminsModule,
+    forwardRef(() => PostsModule),
   ],
   controllers: [UsersController, UsersAdminController],
   providers: [UsersService, UsersAdminService],

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,11 +16,12 @@ import { VoteRealtimeGateway } from 'src/common/realtime/vote-realtime.gateway';
   imports: [
     TypeOrmModule.forFeature([Post, Vote]),
     AdminsModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     MoviesModule,
     SeriesModule,
   ],
   controllers: [PostsController, PostsAdminController],
   providers: [PostsService, PostsAdminService, VoteRealtimeGateway],
+  exports: [PostsService]
 })
 export class PostsModule {}

@@ -9,6 +9,9 @@ import { UpdateUserDto } from './dto/requests/update-user.dto';
 import { LoginUserDto } from './dto/requests/login-user.dto';
 import { User } from './entities/user.entity';
 import { generatePassword, throwCustomError, unlinkFile } from 'src/common/helper';
+import { Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Post } from 'src/posts/entities/post.entity';
+import { PostsService } from 'src/posts/posts.service';
 
 const scrypt = promisify(_scrypt);
 
@@ -17,6 +20,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private readonly postsService: PostsService,
   ) {}
 
   async login(loginUserDto: LoginUserDto) {
@@ -56,17 +60,32 @@ export class UsersService {
         name: updateUserDto.name,
         email: updateUserDto.email,
     });
-
     if(updateUserDto.password) {
       user.password = await generatePassword(updateUserDto.password)
     }
-
     if(file) {
-        await unlinkFile('users', user.image);
+        if(user.image) await unlinkFile('users', user.image);
         user.image = file.filename;
     }
     
     return this.userRepository.save(user);
+  }
+
+  async findOne(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({where: {id}});
+    if(!user) {
+        throwCustomError("User not found.")
+    }
+    return user!;
+  }
+
+  async getPosts(query: PaginateQuery, user: User): Promise<Paginated<Post>> {
+    return this.postsService.findAll(query, user.id);
+  }
+
+  async getPostsByUser(query: PaginateQuery, id: number): Promise<Paginated<Post>> {
+    await this.findOne(id);
+    return this.postsService.findAll(query, +id);
   }
 
   async generateToken(payload) {

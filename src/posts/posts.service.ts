@@ -67,11 +67,11 @@ export class PostsService {
         return this.postRepository.save(post!);
     }
 
-    async findAll(query: PaginateQuery): Promise<Paginated<Post>> {
+    async findAll(query: PaginateQuery, userId?: number): Promise<Paginated<Post>> {
         const queryBuilder = await this.postRepository
             .createQueryBuilder('post')
             .leftJoin('post.user', 'user') 
-            .addSelect(['user.name', 'user.image']) 
+            .addSelect(['user.id', 'user.name', 'user.image']) 
             .leftJoin('post.movie', 'movie')
             .addSelect(['movie.id', 'movie.name', 'movie.main_poster']) 
             .leftJoin('post.serie', 'serie')
@@ -88,6 +88,7 @@ export class PostsService {
                 'vote',
                 qb => qb.andWhere('vote.type = :type', { type: 'DOWN' })
             )
+        if(userId) queryBuilder.where('user.id = :id', {id: userId})
         const config: PaginateConfig<Post> = {
             relations: ['movie', 'serie'],
             sortableColumns: ['id'],
@@ -101,7 +102,27 @@ export class PostsService {
     }
 
     async findOne(id: number) {
-        const post = await this.postRepository.findOne({where: {id}, relations: ['user', 'movie', 'serie']});
+        const post = await this.postRepository
+            .createQueryBuilder('post')
+            .where('post.id = :id', {id})
+            .leftJoin('post.user', 'user') 
+            .addSelect(['user.id', 'user.name', 'user.image']) 
+            .leftJoin('post.movie', 'movie')
+            .addSelect(['movie.id', 'movie.name', 'movie.main_poster']) 
+            .leftJoin('post.serie', 'serie')
+            .addSelect(['serie.id', 'serie.name', 'serie.main_poster']) 
+            .loadRelationCountAndMap(
+                'post.upvoteCount',
+                'post.votes',
+                'vote',
+                qb => qb.andWhere('vote.type = :type', { type: 'UP' })
+            )
+            .loadRelationCountAndMap(
+                'post.downvoteCount',
+                'post.votes',
+                'vote',
+                qb => qb.andWhere('vote.type = :type', { type: 'DOWN' })
+            ).getOne()
         if(!post) {
             throwCustomError("Post not found.")
         }
@@ -109,12 +130,12 @@ export class PostsService {
     }
 
     async remove(id: number, user: User) {
-        const post = await this.postRepository.findOne({where: {id: id, user: {id: user.id}}});
-        if(!post) {
+        const post = await this.findOne(id)
+        if(!post || post.user.id !== user.id) {
             throwCustomError("Post not found.")
         }
         await this.postRepository.remove(post!);
-        return post; 
+        return {...post, id: id}; 
     }
 
     async vote(id: number, user: User, votePostDto: VotePostDto) {
