@@ -16,7 +16,7 @@ export class GenresService {
       maxLimit: 10,
       defaultSortBy: [['createdAt', 'DESC']]
     }
-    query.limit = query.limit == 0 ? 10 : query.limit;
+    query.limit = query.limit == 0 ? 100 : query.limit;
     const result = await paginate<Genre>(query, this.genreRepository, config)
     return result;
   }

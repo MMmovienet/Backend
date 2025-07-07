@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Movie } from './entities/movie.entity';
 import { Repository } from 'typeorm';
 import { throwCustomError } from 'src/common/helper';
-import { paginate, PaginateConfig, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { FilterOperator, paginate, PaginateConfig, Paginated, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class MoviesService {
@@ -17,6 +17,12 @@ export class MoviesService {
             sortableColumns: ['id', 'name'],
             maxLimit: 10,
             defaultSortBy: [['createdAt', 'DESC']],
+            searchableColumns: ['name'],
+        }
+        if(query.filter && query.filter['genres.name']){
+            config.filterableColumns =  {
+                'genres.name': [FilterOperator.EQ],
+            }
         }
         query.limit = query.limit == 0 ? 10 : query.limit;
         const result = await paginate<Movie>(query, this.movieRepository, config);
