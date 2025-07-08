@@ -15,7 +15,6 @@ export class MoviesService {
         const config: PaginateConfig<Movie> = {
             relations: ['genres'],
             sortableColumns: ['id', 'name'],
-            maxLimit: 10,
             defaultSortBy: [['createdAt', 'DESC']],
             searchableColumns: ['name'],
         }

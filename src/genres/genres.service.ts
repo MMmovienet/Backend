@@ -13,7 +13,6 @@ export class GenresService {
   async findAll(query: PaginateQuery): Promise<Paginated<Genre>> {
     const config: PaginateConfig<Genre> = {
       sortableColumns: ['id', 'name'],
-      maxLimit: 10,
       defaultSortBy: [['createdAt', 'DESC']]
     }
     query.limit = query.limit == 0 ? 100 : query.limit;
