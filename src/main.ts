@@ -27,6 +27,6 @@ async function bootstrap() {
   useContainer(app.select(AppModule), {fallbackOnErrors: true});
   const configService = app.get(ConfigService);
   app.use('/uploads', express.static(join(process.cwd(), 'uploads'))); 
-  await app.listen(configService.get('PORT') ?? 3000);
+  await app.listen(configService.get('PORT') ?? 3000, '0.0.0.0');
 }
 bootstrap();

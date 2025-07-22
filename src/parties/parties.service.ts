@@ -9,6 +9,7 @@ import { MoviesService } from 'src/movies/movies.service';
 import { getRandomCharsFromString, throwCustomError } from 'src/common/helper';
 import { UsersAdminService } from 'src/users/admin/users-admin.service';
 import { EpisodesAdminService } from 'src/episodes/admin/episodes-admin.service';
+import { FilterOperator, paginate, PaginateConfig, Paginated, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class PartiesService {
@@ -65,8 +66,29 @@ export class PartiesService {
         return this.partiesRepository.save(partyInstance);
     }
 
-    findAll() {
-        return `This action returns all party`;
+    async findAll(query: PaginateQuery, user: User): Promise<Paginated<Party>> {
+        const queryBuilder = this.partiesRepository.createQueryBuilder('party')
+            .leftJoin('party.admin', 'admin')
+            .leftJoin('party.members', 'member')
+        const config: PaginateConfig<Party> = {
+            relations: ['members', 'admin'],
+            sortableColumns: ['id', 'createdAt'],
+            defaultSortBy: [['createdAt', 'DESC']],
+            searchableColumns: ['title'],
+        }
+        if(query.filter && query.filter['admin.id']){
+            queryBuilder.where('party.admin.id = :adminId', { adminId: user.id });
+        }
+        if(query.filter && query.filter['members.id']){
+            queryBuilder.orWhere('member.id = :memberId', { memberId: user.id });
+        }
+        if(!query.filter) {
+            queryBuilder.where('party.admin.id = :adminId', { adminId: user.id })
+                .orWhere('member.id = :memberId', { memberId: user.id });
+        }
+        query.limit = query.limit == 0 ? 10 : query.limit;
+        const result = await paginate<Party>(query, queryBuilder, config);
+        return result;
     }
 
     async getParty(partyId: string) {

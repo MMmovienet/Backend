@@ -5,6 +5,8 @@ import { UserGuard } from 'src/common/guards/user.guard';
 import { Serialize } from 'src/common/interceptors/serialize.interceptor';
 import { PartyDto } from '../parties/dto/responses/party.dto';
 import { PartiesService } from './parties.service';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Party } from './entities/party.entity';
 
 @Controller('parties')
 @Serialize(PartyDto)
@@ -18,8 +20,8 @@ export class PartiesController {
   }
 
   @Get()
-  findAll() {
-    return this.partiesService.findAll();
+  findAll(@Paginate() query: PaginateQuery, @Request() req): Promise<Paginated<Party>> {
+    return this.partiesService.findAll(query, req.user);
   }
 
   @Get(':partyId')
