@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, UseInterceptors, Request, UploadedFile, UseGuards, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Patch, UseInterceptors, Request, UploadedFile, UseGuards, Get, Param, Inject } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/requests/create-user.dto';
 import { UpdateUserDto } from './dto/requests/update-user.dto';
@@ -13,6 +13,7 @@ import { AuthUserDto } from './dto/responses/auth-user.dto';
 import { PostDto } from 'src/posts/dto/responses/post.dto';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Post as PostEntity } from 'src/posts/entities/post.entity';
+import { VerifyUserDto } from './dto/requests/verify-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -25,9 +26,21 @@ export class UsersController {
     }
 
     @Post('/register')
-    @Serialize(AuthUserDto, 'Successfully registered.')
+    @Serialize(AuthUserDto, 'Please verify your account.')
     register(@Body() createUserDto: CreateUserDto) {
         return this.usersService.register(createUserDto);
+    }
+
+    @Post('/verify')
+    @Serialize(AuthUserDto, 'Account verification success.')
+    verify(@Body() verifyUserDto: VerifyUserDto) {
+        return this.usersService.verify(verifyUserDto.email, +verifyUserDto.otp)
+    }
+
+    @Get('/resend-otp/:email')
+    @Serialize(UserDto, 'OTP Code was sent.')
+    resendOtp(@Param('email') email: string) {
+        return this.usersService.resendOtpCode(email);
     }
 
     @Patch()

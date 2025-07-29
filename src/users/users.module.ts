@@ -9,6 +9,7 @@ import { UsersAdminController } from './admin/users-admin.controller';
 import { UsersAdminService } from './admin/users-admin.service';
 import { AdminsModule } from 'src/admins/admins.module';
 import { PostsModule } from 'src/posts/posts.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PostsModule } from 'src/posts/posts.module';
       }),
       inject: [ConfigService],
     }),
+    CacheModule.register(),
     AdminsModule,
     forwardRef(() => PostsModule),
   ],

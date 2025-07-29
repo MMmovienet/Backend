@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, UpdateDateColumn } from "typeorm";
 import { BaseEntity } from "src/common/database/base.entity";
 import { Party } from "src/parties/entities/party.entity";
 import { Vote } from "src/posts/entities/vote.entity";
@@ -17,6 +17,9 @@ export class User extends BaseEntity<User> {
 
     @Column()
     password: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    verifiedAt: Date;
 
     @OneToMany(() => Party, (party) => party.admin, {cascade: true})
     parties: Party[];

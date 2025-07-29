@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { Not, Repository } from 'typeorm';
@@ -12,6 +12,9 @@ import { generatePassword, throwCustomError, unlinkFile } from 'src/common/helpe
 import { Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Post } from 'src/posts/entities/post.entity';
 import { PostsService } from 'src/posts/posts.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { MailerService } from '@nestjs-modules/mailer';
 
 const scrypt = promisify(_scrypt);
 
@@ -21,19 +24,25 @@ export class UsersService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService,
     private readonly postsService: PostsService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly mailService: MailerService
   ) {}
 
   async login(loginUserDto: LoginUserDto) {
-    const [user] = await this.userRepository.find({ where: { email: loginUserDto.email } });
+    const user = await this.findByEmail(loginUserDto.email);
     if(!user) {
       throwCustomError('Your credentials is incorrect.', HttpStatus.UNAUTHORIZED);
     }   
-    const [salt, storedHash] = user.password.split('.');
+    if(user!.verifiedAt === null) {
+      await this.storeOtpAndSendToUserMail(user!.email)
+      throwCustomError('Please verified your account.', HttpStatus.FORBIDDEN)
+    }
+    const [salt, storedHash] = user!.password.split('.');
     const hash = (await scrypt(loginUserDto.password, salt, 32)) as Buffer;
     if(storedHash !== hash.toString('hex')) {
       throwCustomError('Your password is incorrect!', HttpStatus.UNAUTHORIZED);
     }
-    const token = await this.generateToken({ id: user.id, email: user.email })
+    const token = await this.generateToken({ id: user!.id, email: user!.email })
     return {...user, access_token: token};
   }
 
@@ -45,8 +54,33 @@ export class UsersService {
         password: hashPassword
     });
     const user = await this.userRepository.save(userInstance);
-    const token = await this.generateToken({ id: user.id, email: user.email })
+
+    await this.storeOtpAndSendToUserMail(user!.email)
+    return user;
+  }
+
+  async verify(email: string, otp: number) {
+    const storedOtp = await this.cacheManager.get(`${email}_otp_code`);
+    if(storedOtp !== otp) {
+      throwCustomError("Invalid OTP code!")
+    } 
+    const user = await this.findByEmail(email);
+    user!.verifiedAt = new Date();
+    await this.userRepository.save(user!);
+    const token = await this.generateToken({ id: user!.id, email: user!.email })
     return {...user, access_token: token};
+  }
+
+  async resendOtpCode(email: string) {
+    const user = await this.findByEmail(email);
+    if(!user) {
+      throwCustomError('Please register first!');
+    }
+    if(user!.verifiedAt !== null) {
+      throwCustomError('You are already verified.')
+    }
+    await this.storeOtpAndSendToUserMail(user!.email)
+    return user;
   }
 
   async update(updateUserDto: UpdateUserDto, user, file: Express.Multer.File) {
@@ -90,5 +124,32 @@ export class UsersService {
 
   async generateToken(payload) {
     return this.jwtService.signAsync(payload);
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({where: {email}});
+  }
+
+  async storeOtpAndSendToUserMail(email) {
+    const code  = Math.floor(Math.random() * 900000) + 100000;
+    await this.cacheManager.set(`${email}_otp_code`, code, 300000);
+    this.sendOTPMail(email, code);
+  }
+
+  sendOTPMail(email, otpCode) {
+    this.mailService.sendMail({
+      from: `"Movie Net" <${process.env.APP_USER}>`,
+      to: email,
+      subject: `Welcome to Movie Net`,
+      html: `
+        <div style="font-family: sans-serif;">
+          <h2>Welcome!</h2>
+          <p>We’re glad you joined us.</p>
+          <p>Your OTP code is: <strong>${otpCode}</strong></p>
+          <p>Use this code to complete your verification.</p>
+          <small>This code will expire 5 minutes after it was sent.</small>
+        </div>
+      `
+    });
   }
 }

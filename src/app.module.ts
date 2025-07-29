@@ -16,10 +16,22 @@ import { EpisodesModule } from './episodes/episodes.module';
 import { SeasonsModule } from './seasons/seasons.module';
 import { AdminRealtimeGateway } from './common/realtime/admin-realtime.gateway';
 import { PostsModule } from './posts/posts.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
         ConfigModule.forRoot({isGlobal: true}),
+        MailerModule.forRoot({
+          transport: {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            service: process.env.SMTP_SERVICE,
+            auth: {
+              user: process.env.APP_USER,
+              pass: process.env.APP_PASS,
+            },
+          },
+        }),
         DatabaseModule,
         AdminsModule,
         UsersModule,
