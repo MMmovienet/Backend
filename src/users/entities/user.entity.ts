@@ -3,6 +3,7 @@ import { BaseEntity } from "src/common/database/base.entity";
 import { Party } from "src/parties/entities/party.entity";
 import { Vote } from "src/posts/entities/vote.entity";
 import { Post } from "src/posts/entities/post.entity";
+import { Message } from "src/messages/entities/message.entity";
 
 @Entity("users")
 export class User extends BaseEntity<User> {
@@ -33,4 +34,7 @@ export class User extends BaseEntity<User> {
 
     @OneToMany(() => Vote, (vote) => vote.user, {cascade: true})
     votes: Vote[];
+
+    @OneToMany(() => Message, (message) => message.user, {cascade: true})
+    messages: Message[];
 }

@@ -17,6 +17,7 @@ import { SeasonsModule } from './seasons/seasons.module';
 import { AdminRealtimeGateway } from './common/realtime/admin-realtime.gateway';
 import { PostsModule } from './posts/posts.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         EpisodesModule,
         SeasonsModule,
         PostsModule,
+        MessagesModule,
   ],
   controllers: [AppController],
   providers: [
