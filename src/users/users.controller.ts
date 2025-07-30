@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, UseInterceptors, Request, UploadedFile, UseGuards, Get, Param, Inject } from '@nestjs/common';
+import { Controller, Post, Body, Patch, UseInterceptors, Request, UploadedFile, UseGuards, Get, Param, Inject, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/requests/create-user.dto';
 import { UpdateUserDto } from './dto/requests/update-user.dto';
@@ -14,6 +14,7 @@ import { PostDto } from 'src/posts/dto/responses/post.dto';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Post as PostEntity } from 'src/posts/entities/post.entity';
 import { VerifyUserDto } from './dto/requests/verify-user.dto';
+import { ResetPasswordDto } from './dto/requests/reset-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -39,8 +40,25 @@ export class UsersController {
 
     @Get('/resend-otp/:email')
     @Serialize(UserDto, 'OTP Code was sent.')
-    resendOtp(@Param('email') email: string) {
-        return this.usersService.resendOtpCode(email);
+    resendOtp(@Param('email') email: string, @Query('status') isVerify: string) {
+        const resendStatus = isVerify ? true : false;
+        return this.usersService.resendOtpCode(email, resendStatus);
+    }
+
+    @Get('/forgot-password/:email')
+    @Serialize(UserDto, 'OTP code was sent that will allow you to set a new password.')
+    forgotPassword(@Param('email') email: string) {
+        return this.usersService.forgotPassword(email);
+    }
+
+    @Post('/reset-password')
+    @Serialize(UserDto, 'Successfully updated your password')
+    resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+        return this.usersService.resetPassword(
+            resetPasswordDto.email,
+            +resetPasswordDto.otp,
+            resetPasswordDto.password,
+        );
     }
 
     @Patch()

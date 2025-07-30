@@ -34,7 +34,7 @@ export class UsersService {
       throwCustomError('Your credentials is incorrect.', HttpStatus.UNAUTHORIZED);
     }   
     if(user!.verifiedAt === null) {
-      await this.storeOtpAndSendToUserMail(user!.email)
+      await this.storeOtpAndSendToUserMail(user!.email, 'Use this code to complete your verification.')
       throwCustomError('Please verified your account.', HttpStatus.FORBIDDEN)
     }
     const [salt, storedHash] = user!.password.split('.');
@@ -55,7 +55,7 @@ export class UsersService {
     });
     const user = await this.userRepository.save(userInstance);
 
-    await this.storeOtpAndSendToUserMail(user!.email)
+    await this.storeOtpAndSendToUserMail(user!.email, 'Use this code to complete your verification.')
     return user;
   }
 
@@ -71,16 +71,39 @@ export class UsersService {
     return {...user, access_token: token};
   }
 
-  async resendOtpCode(email: string) {
+  async resendOtpCode(email: string, isVerify) {
     const user = await this.findByEmail(email);
     if(!user) {
       throwCustomError('Please register first!');
     }
-    if(user!.verifiedAt !== null) {
+    if(isVerify && user!.verifiedAt !== null) {
       throwCustomError('You are already verified.')
     }
-    await this.storeOtpAndSendToUserMail(user!.email)
+    const text = isVerify ? 'Use this code to complete your verification.' : 'Use this code to reset your password.';
+    await this.storeOtpAndSendToUserMail(user!.email, text)
     return user;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.findByEmail(email);
+    if(!user) {
+      throwCustomError('Incorrect data!');
+    }
+    await this.storeOtpAndSendToUserMail(user!.email, 'Use this code to reset your password.')
+    return user;
+  }
+
+  async resetPassword(email: string, otp: number, password: string) {
+    const storedOtp = await this.cacheManager.get(`${email}_otp_code`);
+    if(storedOtp !== otp) {
+      throwCustomError("Invalid OTP code!")
+    } 
+    const user = await this.findByEmail(email);
+    if(user!.verifiedAt === null) {
+      user!.verifiedAt = new Date();
+    }
+    user!.password = await generatePassword(password)
+    return this.userRepository.save(user!);
   }
 
   async update(updateUserDto: UpdateUserDto, user, file: Express.Multer.File) {
@@ -130,13 +153,9 @@ export class UsersService {
     return this.userRepository.findOne({where: {email}});
   }
 
-  async storeOtpAndSendToUserMail(email) {
-    const code  = Math.floor(Math.random() * 900000) + 100000;
+  async storeOtpAndSendToUserMail(email: string, text: string) {
+    const code = Math.floor(Math.random() * 900000) + 100000;
     await this.cacheManager.set(`${email}_otp_code`, code, 300000);
-    this.sendOTPMail(email, code);
-  }
-
-  sendOTPMail(email, otpCode) {
     this.mailService.sendMail({
       from: `"Movie Net" <${process.env.APP_USER}>`,
       to: email,
@@ -145,8 +164,8 @@ export class UsersService {
         <div style="font-family: sans-serif;">
           <h2>Welcome!</h2>
           <p>We’re glad you joined us.</p>
-          <p>Your OTP code is: <strong>${otpCode}</strong></p>
-          <p>Use this code to complete your verification.</p>
+          <p>Your OTP code is: <strong>${code}</strong></p>
+          <p>${text}</p>
           <small>This code will expire 5 minutes after it was sent.</small>
         </div>
       `
