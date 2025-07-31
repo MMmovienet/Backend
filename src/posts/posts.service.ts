@@ -71,7 +71,7 @@ export class PostsService {
         const queryBuilder = await this.postRepository
             .createQueryBuilder('post')
             .leftJoin('post.user', 'user') 
-            .addSelect(['user.id', 'user.name', 'user.image']) 
+            .addSelect(['user.id', 'user.username', 'user.name', 'user.image']) 
             .leftJoin('post.movie', 'movie')
             .addSelect(['movie.id', 'movie.name', 'movie.main_poster']) 
             .leftJoin('post.serie', 'serie')

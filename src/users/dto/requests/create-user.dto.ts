@@ -2,10 +2,14 @@ import { IsEmail, IsOptional, IsString, min, MinLength } from "class-validator";
 import { IsUnique } from "src/common/validators/is-unique.constraint ";
 
 export class CreateUserDto {
-    @IsString({message: 'Name must be a string'})
+    @IsString({message: 'Name is required'})
     name: string;
 
-    @IsString({message: 'Email must be a string'})
+    @IsString()
+    @IsOptional()
+    username: string;
+
+    @IsString({message: 'Email is required'})
     @IsUnique({tableName: 'users', column: 'email'})
     @IsEmail({}, {message: 'Email must be a valid email'})
     email: string;

@@ -19,8 +19,14 @@ export class UsersAdminService {
         if(file) {
             fileName = file.filename;
         }
+        let username = createUserDto.email.split('@')[0];
+        const existedUserByUsername = await this.userRepository.findOne({where: {username}});
+        if(existedUserByUsername) {
+            username = username + (Math.floor(Math.random() * 900000) + 100000);
+        }
         const userInstance = this.userRepository.create({
             name: createUserDto.name,
+            username: username,
             email: createUserDto.email,
             password: hashPassword,
             image: fileName
@@ -29,16 +35,19 @@ export class UsersAdminService {
         return user;
     }
 
-    async update(updateUserDto: UpdateUserDto, id, file: Express.Multer.File): Promise<User> {
+    async update(updateUserDto: UpdateUserDto, id: number, file: Express.Multer.File): Promise<User> {
         const user: User = await this.findOne(id);
-        if(updateUserDto.email) {
-          const existedUser = await this.userRepository.findOne({where: {email: updateUserDto.email, id: Not(id)}});
-          if(existedUser) {
-              throwCustomError('Email has already exist.');
-          }
+        const existedUserByEmail = await this.userRepository.findOne({where: {email: updateUserDto.email, id: Not(user.id)}});
+        if(existedUserByEmail) {
+            throwCustomError('An account with this email already exists.');
+        }
+        const existedUserByUsername = await this.userRepository.findOne({where: {username: updateUserDto.username, id: Not(user.id)}});
+        if(existedUserByUsername) {
+            throwCustomError('An account with this username already exists.');
         }
         Object.assign(user, {
             name: updateUserDto.name,
+            username: updateUserDto.username,
             email: updateUserDto.email,
         });
     

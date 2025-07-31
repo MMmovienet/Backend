@@ -1,4 +1,4 @@
-import { Expose, Transform } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
 import { BaseDto } from "src/common/dto/base.dto";
 import { Movie } from "src/movies/entities/movie.entity";
 import { Serie } from "src/series/entities/serie.entity";
@@ -16,6 +16,13 @@ export class PostDto extends BaseDto {
     @Expose()
     @Transform((data) => {
         return data.obj.user?.name;
+    })
+    publisher: string;
+
+    @Expose()
+    @Transform((data) => {
+        console.log('**********************', data.obj.user?.username)
+        return data.obj.user?.username;
     })
     username: string;
 

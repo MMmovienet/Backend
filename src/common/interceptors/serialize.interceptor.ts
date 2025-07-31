@@ -17,20 +17,25 @@ interface ResponseFormat<T> {
   data: any;
 }
 
-export function Serialize(dto: ClassConstructor, message: string = 'Request successful') {
-  return UseInterceptors(new SerializeInterceptor(dto, message))
+interface ExtraData {
+  key: string,
+  dto?: ClassConstructor,
+}
+
+export function Serialize(dto: ClassConstructor, message: string = 'Request successful', extraData?: ExtraData ) {
+  return UseInterceptors(new SerializeInterceptor(dto, message, extraData))
 }
 
 @Injectable()
 export class SerializeInterceptor<T> implements NestInterceptor {
-  constructor(private dto: any, private message: string){}
+  constructor(private dto: any, private message: string, private extraData?: ExtraData){}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data: any): ResponseFormat<T> => {
         const response = context.switchToHttp().getResponse();
         const statusCode = response.statusCode;
         if(data && data.data && data.meta && data.links) {
-          return {
+          const returnedDataFormat = {
             success: statusCode >= 200 && statusCode < 300,
             messages: [this.message],
             error: null,
@@ -43,6 +48,10 @@ export class SerializeInterceptor<T> implements NestInterceptor {
               links: data.links,
             },
           };
+          if(data.extraData && this.extraData) {
+            returnedDataFormat.data[this.extraData.key] = this.extraData.dto ? plainToClass(this.extraData.dto, data.extraData, {excludeExtraneousValues: true}) : data.extraData
+          }
+          return returnedDataFormat;
         }
         let newFormat = plainToClass(this.dto, data, {
           excludeExtraneousValues: true,

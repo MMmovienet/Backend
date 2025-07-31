@@ -7,6 +7,9 @@ export class UserDto extends BaseDto {
     name: string;
 
     @Expose()
+    username: string;
+
+    @Expose()
     email: string;
 
     @Expose()

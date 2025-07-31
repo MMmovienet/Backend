@@ -15,6 +15,7 @@ import { PostsService } from 'src/posts/posts.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
+import { PaginatedWithExtraData } from 'src/common/interfaces/paginated-extra-data.interface';
 
 const scrypt = promisify(_scrypt);
 
@@ -47,15 +48,20 @@ export class UsersService {
   }
 
   async register(createUserDto: CreateUserDto) {
-    const hashPassword = await generatePassword(createUserDto.password)
+    const hashPassword = await generatePassword(createUserDto.password);
+    let username = createUserDto.email.split('@')[0];
+    const existedUserByUsername = await this.userRepository.findOne({where: {username}});
+    if(existedUserByUsername) {
+        username = username + (Math.floor(Math.random() * 900000) + 100000);
+    }
     const userInstance = this.userRepository.create({
         name: createUserDto.name,
+        username: username,
         email: createUserDto.email,
         password: hashPassword
     });
     const user = await this.userRepository.save(userInstance);
-
-    await this.storeOtpAndSendToUserMail(user!.email, 'Use this code to complete your verification.')
+    await this.storeOtpAndSendToUserMail(user!.email, 'Use this code to complete your verification.');
     return user;
   }
 
@@ -106,15 +112,18 @@ export class UsersService {
     return this.userRepository.save(user!);
   }
 
-  async update(updateUserDto: UpdateUserDto, user, file: Express.Multer.File) {
-    if(updateUserDto.email) {
-      const existedUser = await this.userRepository.findOne({where: {email: updateUserDto.email, id: Not(user.id)}});
-      if(existedUser) {
-          throwCustomError('Email has already exist.');
-      }
+  async update(updateUserDto: UpdateUserDto, user: User, file: Express.Multer.File) {
+    const existedUserByEmail = await this.userRepository.findOne({where: {email: updateUserDto.email, id: Not(user.id)}});
+    if(existedUserByEmail) {
+        throwCustomError('An account with this email already exists.');
+    }
+    const existedUserByUsername = await this.userRepository.findOne({where: {username: updateUserDto.username, id: Not(user.id)}});
+    if(existedUserByUsername) {
+        throwCustomError('An account with this username already exists.');
     }
     Object.assign(user, {
         name: updateUserDto.name,
+        username: updateUserDto.username,
         email: updateUserDto.email,
     });
     if(updateUserDto.password) {
@@ -140,9 +149,13 @@ export class UsersService {
     return this.postsService.findAll(query, user.id);
   }
 
-  async getPostsByUser(query: PaginateQuery, id: number): Promise<Paginated<Post>> {
-    await this.findOne(id);
-    return this.postsService.findAll(query, +id);
+  async getPostsByUser(query: PaginateQuery, username: string): Promise<PaginatedWithExtraData<Post>> {
+    const user = await this.userRepository.findOne({where: {username}});
+    if(!user) {
+      throwCustomError("User not found.")
+    }
+    const postsData = await this.postsService.findAll(query, user!.id);
+    return { ...postsData, extraData: user };
   }
 
   async generateToken(payload) {

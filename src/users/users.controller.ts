@@ -15,6 +15,8 @@ import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Post as PostEntity } from 'src/posts/entities/post.entity';
 import { VerifyUserDto } from './dto/requests/verify-user.dto';
 import { ResetPasswordDto } from './dto/requests/reset-password.dto';
+import { User } from './entities/user.entity';
+import { PaginatedWithExtraData } from 'src/common/interfaces/paginated-extra-data.interface';
 
 @Controller('users')
 export class UsersController {
@@ -102,9 +104,11 @@ export class UsersController {
         return this.usersService.findOne(+id);
     }
     
-    @Get(':id/posts')
-    @Serialize(PostDto) 
-    async getPostsByUser(@Param('id') id: string, @Paginate() query: PaginateQuery): Promise<Paginated<PostEntity>> {
-        return this.usersService.getPostsByUser(query, +id);
+    @Get(':username/posts')
+    @Serialize(PostDto, 'Request success', {key: 'user', dto: UserDto}) 
+    async getPostsByUser(@Param('username') username: string, @Paginate() query: PaginateQuery): Promise<PaginatedWithExtraData<PostEntity>> {
+        const data = await this.usersService.getPostsByUser(query, username);
+        return data;
     }
 }
+
