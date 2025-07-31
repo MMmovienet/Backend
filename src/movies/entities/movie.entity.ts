@@ -10,6 +10,9 @@ export class Movie extends BaseEntity<Movie> {
     @Column()
     name: string;
 
+    @Column({unique: true})
+    slug: string;
+
     @Column()
     description: string;    
 

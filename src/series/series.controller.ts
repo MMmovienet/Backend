@@ -16,16 +16,16 @@ export class SeriesController {
     return this.seriesService.findAll(query);
   }
 
-  @Get(':id')
+  @Get(':slug')
   @Serialize(SerieDto)
-  findOne(@Param('id') id: string) {
-    return this.seriesService.findOne(+id);
+  findOne(@Param('slug') slug: string) {
+    return this.seriesService.findBySlug(slug);
   }
 
-  @Get(':id/episodes/:episodeId')
+  @Get(':serie_slug/episodes/:episode_slug')
   @Serialize(EpisodeDto)
-  getEpisode(@Param('id') id: string, @Param('episodeId') episodeId: string) {
-    return this.seriesService.getEpisode(+id, +episodeId)
+  getEpisode(@Param('serie_slug') serie_slug: string, @Param('episode_slug') episode_slug: string) {
+    return this.seriesService.getEpisode(serie_slug, episode_slug)
   }
 
   @Get('/search/:keyword')

@@ -21,7 +21,6 @@ export class PostDto extends BaseDto {
 
     @Expose()
     @Transform((data) => {
-        console.log('**********************', data.obj.user?.username)
         return data.obj.user?.username;
     })
     username: string;

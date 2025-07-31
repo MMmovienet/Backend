@@ -23,8 +23,8 @@ export class EpisodesAdminService {
         return episode!;
     }
 
-    async getExactEpisode(serieId: number, episodeId: number): Promise<Episode> {
-        const episode = await this.episodeRepository.findOne({where: {id: episodeId, serie: {id: serieId}}, relations: ['serie', 'season']});
+    async getExactEpisode(serie_slug: string, episode_slug: string): Promise<Episode> {
+        const episode = await this.episodeRepository.findOne({where: {slug: episode_slug, serie: {slug: serie_slug}}, relations: ['serie', 'season']});
         if(!episode) {
             throwCustomError("Episode not found!")
         }
@@ -62,6 +62,7 @@ export class EpisodesAdminService {
         const episodeInstance = this.episodeRepository.create({
             number: createEpisodeDto.number,
             name: createEpisodeDto.name,
+            slug: createEpisodeDto.slug,
             description: createEpisodeDto.description,
             serie: serie,
             src: file.filename,
@@ -81,7 +82,7 @@ export class EpisodesAdminService {
                     id: Not(id), 
                 },
             });
-            console.log(existedEpisode)
+            console.log(existedEpisode) 
             if (existedEpisode) {
                 throwCustomError("Episode number already exists in this serie.");
             }
@@ -91,9 +92,15 @@ export class EpisodesAdminService {
         let season = episode.season;
         if(updateEpisodeDto && updateEpisodeDto.seasonId) 
             season = await this.seasonsAdminService.getSeasonOfSerie(updateEpisodeDto.seasonId, episode.serie.id);
+
+        const existedEpisodeBySlug = await this.episodeRepository.findOne({where: {slug: updateEpisodeDto.slug, id: Not(id)}});
+        if(existedEpisodeBySlug) {
+            throwCustomError('Episode with this slug already exists.');
+        }
         Object.assign(episode, {
             number: updateEpisodeDto && updateEpisodeDto.number ? updateEpisodeDto.number: episode.number,
             name: updateEpisodeDto && updateEpisodeDto.name ? updateEpisodeDto.name: episode.name,
+            slug: updateEpisodeDto && updateEpisodeDto.slug ? updateEpisodeDto.slug: episode.slug,
             description: updateEpisodeDto ? updateEpisodeDto.description : episode.description,
             src: filename,
             season: season,

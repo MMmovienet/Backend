@@ -13,6 +13,9 @@ export class Episode extends BaseEntity<Episode>{
     @Column()
     name: string;
 
+    @Column({unique: true})
+    slug: string;
+
     @Column()
     description: string;
 

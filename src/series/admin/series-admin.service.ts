@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Serie } from "../entities/serie.entity";
-import { Repository } from "typeorm";
+import { Not, Repository } from "typeorm";
 import { paginate, PaginateConfig, Paginated, PaginateQuery } from "nestjs-paginate";
 import { throwCustomError, unlinkFile } from "src/common/helper";
 import { CreateSerieDto } from "../dto/requests/create-serie.dto";
@@ -63,6 +63,7 @@ export class SeriesAdminService {
         );
         const serieInstance = this.serieRepository.create({
             name: createSerieDto.name,
+            slug: createSerieDto.slug,
             description: createSerieDto.description,
             release_date: createSerieDto.release_date,
             main_poster: main_poster[0].filename,
@@ -89,8 +90,14 @@ export class SeriesAdminService {
         if(main_poster) await unlinkFile('posters', serie.main_poster);
         if(cover_poster && serie.cover_poster) await unlinkFile('posters', serie.cover_poster);
 
+        const existedSerieBySlug = await this.serieRepository.findOne({where: {slug: updateSerieDto.slug, id: Not(id)}});
+        if(existedSerieBySlug) {
+            throwCustomError('Serie with this slug already exists.');
+        }
+
         Object.assign(serie, {
             name: updateSerieDto && updateSerieDto.name ? updateSerieDto.name : serie.name,
+            slug: updateSerieDto && updateSerieDto.slug ? updateSerieDto.slug : serie.slug,
             description: updateSerieDto && updateSerieDto.description ? updateSerieDto.description : serie.description,
             release_date: updateSerieDto.release_date ? updateSerieDto.release_date : serie.release_date,
             main_poster: main_poster ? main_poster[0].filename : serie.main_poster,

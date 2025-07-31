@@ -1,9 +1,14 @@
 import { Transform } from "class-transformer";
 import { ArrayMinSize, ArrayNotEmpty, IsArray, IsOptional, IsString } from "class-validator";
+import { IsUnique } from "src/common/validators/is-unique.constraint ";
 
 export class CreateSerieDto {
     @IsString({message: "Serie name is required"})
     name: string;
+
+    @IsString({message: "Slug is required"})
+    @IsUnique({tableName: 'series', column: 'slug'})
+    slug: string;
 
     @IsString({message: "Serie description is required"})
     description: string;

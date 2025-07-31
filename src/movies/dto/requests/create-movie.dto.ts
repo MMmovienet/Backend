@@ -1,9 +1,14 @@
 import { Transform } from "class-transformer";
 import { ArrayMinSize, ArrayNotEmpty, IsArray, IsOptional, IsString } from "class-validator";
+import { IsUnique } from "src/common/validators/is-unique.constraint ";
 
 export class CreateMovieDto {
     @IsString({message: "Movie name is required"})
     name: string;
+
+    @IsString({message: "Slug is required"})
+    @IsUnique({tableName: 'movies', column: 'slug'})
+    slug: string;
 
     @IsString({message: "Movie description is required"})
     description: string;

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Movie } from "../entities/movie.entity";
-import { Repository } from "typeorm";
+import { Not, Repository } from "typeorm";
 import { CreateMovieDto } from "../dto/requests/create-movie.dto";
 import { UpdateMovieDto } from "../dto/requests/update-movie.dto";
 import { throwCustomError, unlinkFile } from "src/common/helper";
@@ -29,6 +29,7 @@ export class MoviesAdminService {
         );
         const movieInstance = this.movieRepository.create({
             name: createMovieDto.name,
+            slug: createMovieDto.slug,
             description: createMovieDto.description,
             src: video[0].filename,
             release_date: createMovieDto.release_date,
@@ -58,8 +59,14 @@ export class MoviesAdminService {
         if(main_poster) await unlinkFile('posters', movie.main_poster);
         if(cover_poster && movie.cover_poster) await unlinkFile('posters', movie.cover_poster);
 
+        const existedMovieBySlug = await this.movieRepository.findOne({where: {slug: updateMovieDto.slug, id: Not(id)}});
+        if(existedMovieBySlug) {
+            throwCustomError('Movie with this slug already exists.');
+        }
+
         Object.assign(movie, {
             name: updateMovieDto && updateMovieDto.name ? updateMovieDto.name : movie.name,
+            slug: updateMovieDto && updateMovieDto.slug ? updateMovieDto.slug : movie.slug,
             description: updateMovieDto && updateMovieDto.description ? updateMovieDto.description : movie.description,
             release_date: updateMovieDto.release_date ? updateMovieDto.release_date : movie.release_date,
             src: video && video[0].filename ? video[0].filename : movie.src,

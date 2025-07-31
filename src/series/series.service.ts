@@ -39,8 +39,16 @@ export class SeriesService {
         return serie;
     }
 
-    async getEpisode(serieId: number, episodeId: number) {
-        return this.episodesAdminService.getExactEpisode(serieId, episodeId);
+    async findBySlug(slug: string) {
+        const serie = await this.serieRepository.findOne({where: {slug}, relations: ['genres', 'seasons', 'episodes']});
+        if(!serie) {
+            throwCustomError("Serie not found.")
+        }
+        return serie;
+    }
+
+    async getEpisode(serie_slug: string, episode_slug: string) {
+        return this.episodesAdminService.getExactEpisode(serie_slug, episode_slug);
     }
 
     async search(keyword: string) {

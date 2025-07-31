@@ -54,9 +54,9 @@ export class MoviesController {
         return this.moviesService.findAll(query);
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.moviesService.findOne(+id);
+    @Get('/:slug')
+    findOne(@Param('slug') slug: string) {
+        return this.moviesService.findBySlug(slug);
     }
 
     @Get('/search/:keyword')

@@ -76,7 +76,6 @@ export class MoviesAdminController {
         @Body() updateMovieDto: UpdateMovieDto, 
         @UploadedFiles() files: { src: Express.Multer.File; main_poster: Express.Multer.File; cover_poster: Express.Multer.File },
     ) {
-        console.log('******************************')
         return this.moviesService.update(+id, updateMovieDto, files.src, files.main_poster, files.cover_poster);
     }
 

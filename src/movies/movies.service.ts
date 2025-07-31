@@ -36,6 +36,14 @@ export class MoviesService {
     return movie;
   }
 
+  async findBySlug(slug: string) {
+    const movie = await this.movieRepository.findOne({where: {slug}, relations: ['genres']});
+    if(!movie) {
+      throwCustomError("Movie not found.")
+    }
+    return movie;
+  }
+
   async search(keyword: string) {
     const movies = await this.movieRepository
                           .createQueryBuilder('movie')

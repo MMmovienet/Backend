@@ -11,6 +11,9 @@ export class Serie extends BaseEntity<Serie> {
     @Column()
     name: string;
 
+    @Column({unique: true})
+    slug: string;
+
     @Column({type: 'text'})
     description: string;
 
